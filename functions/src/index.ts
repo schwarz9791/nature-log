@@ -62,7 +62,10 @@ const fetchNatureRemoData = async () => {
   const writeResult = await admin
     .firestore()
     .collection('nature_log')
-    .add(lastData)
+    .add({
+      ...lastData,
+      created_at: admin.firestore.Timestamp.now(),
+    })
   functions.logger.log({
     result: `Nature log with ID: ${writeResult.id} added.`,
   })
