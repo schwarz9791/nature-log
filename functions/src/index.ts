@@ -4,42 +4,49 @@ import fetch from 'node-fetch'
 
 admin.initializeApp()
 
-// // Start writing Firebase Functions
-// // https://firebase.google.com/docs/functions/typescript
-//
-// export const helloWorld = functions.https.onRequest((request, response) => {
-//   functions.logger.info('Hello logs!', {structuredData: true});
-//   response.send('Hello from Firebase!');
-// });
-export const addMessage = functions
-  .region('asia-northeast1')
-  .https.onRequest(async (req, res) => {
-    const original = req.query.text
-    const writeResult = await admin.firestore().collection('messages').add({
-      original,
+// Start writing Firebase Functions
+// https://firebase.google.com/docs/functions/typescript
+
+/* eslint-disable camelcase */
+type NatureRemoNewestEvents = {
+  hu: {
+    created_at: Date
+    val: number
+  }
+  il: {
+    created_at: Date
+    val: number
+  }
+  mo: {
+    created_at: Date
+    val: number
+  }
+  te: {
+    created_at: Date
+    val: number
+  }
+}
+/* eslint-enable camelcase */
+
+const storeNatureRemoData = async (data: NatureRemoNewestEvents) => {
+  const result = await admin
+    .firestore()
+    .collection('nature_log')
+    .add({
+      ...data,
       created_at: admin.firestore.Timestamp.now(),
     })
-    res.json({
-      result: `Message with ID: ${writeResult.id} added.`,
-    })
+
+  // output log
+  functions.logger.log({
+    result: `Nature log with ID: ${result.id} added.`,
   })
 
-export const makeUppercase = functions
-  .region('asia-northeast1')
-  .firestore.document('/messages/{documentId}')
-  .onCreate((snap, context) => {
-    const original = snap.data().original
-    functions.logger.log('Uppercasing', context.params.documentId, original)
-    const uppercase = original.toUpperCase()
-    return snap.ref.set(
-      {
-        uppercase,
-      },
-      {
-        merge: true,
-      }
-    )
-  })
+  return {
+    id: result.id,
+    data,
+  }
+}
 
 const fetchNatureRemoData = async () => {
   const url = 'https://api.nature.global/1/devices'
@@ -53,38 +60,25 @@ const fetchNatureRemoData = async () => {
     headers,
   })
   const data = await res.json()
-  const lastData = data[0].newest_events
 
+  // output log
   functions.logger.info(
-    `Get NatureRemo data succeeded. ${JSON.stringify(lastData)}`
+    `Get NatureRemo data succeeded. ${JSON.stringify(data)}`
   )
 
-  const writeResult = await admin
-    .firestore()
-    .collection('nature_log')
-    .add({
-      ...lastData,
-      created_at: admin.firestore.Timestamp.now(),
-    })
-  functions.logger.log({
-    result: `Nature log with ID: ${writeResult.id} added.`,
-  })
-
-  return {
-    [writeResult.id]: lastData,
-  }
+  return data[0].newest_events as NatureRemoNewestEvents
 }
 
 export const getNatureRemoData = functions
   .region('asia-northeast1')
   .https.onRequest(async (req, res) => {
     try {
-      const result = await fetchNatureRemoData()
-      res.json({
-        result: `Nature log with ID: ${Object.keys(result)[0]} added.`,
-      })
+      const latestLog = await fetchNatureRemoData()
+      const result = await storeNatureRemoData(latestLog)
+      // 直接実行する用のAPIなので、レスポンスに保存されたデータを返す
+      res.json({ status: 200, result })
     } catch (e) {
-      res.json(e.message)
+      res.json({ status: e.status, message: e.message })
     }
   })
 
@@ -92,11 +86,18 @@ export const cronGetNatureRemoData = functions
   .region('asia-northeast1')
   .pubsub.schedule('every 15 minutes')
   .onRun(async (context) => {
-    functions.logger.log('Get NatureRemo Data!!!', JSON.stringify(context))
+    functions.logger.log(
+      'Get start Nature Remo data!!!',
+      JSON.stringify(context)
+    )
     try {
-      await fetchNatureRemoData()
+      const latestLog = await fetchNatureRemoData()
+      await storeNatureRemoData(latestLog)
       return null
     } catch (e) {
+      functions.logger.error(
+        `Get NatureRemo data failed.\n[MESSAGE]: ${e.message}`
+      )
       return null
     }
   })
