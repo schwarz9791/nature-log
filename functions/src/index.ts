@@ -76,7 +76,7 @@ export const getNatureRemoData = functions
       const latestLog = await fetchNatureRemoData()
       // Nature Remo APIから値を取得するだけで、firestoreには保存しないようにしておく
       // const result = await storeNatureRemoData(latestLog)
-      // 直接実行する用のAPIなので、レスポンスに保存されたデータを返す
+      // 直接実行する用のAPIなので、レスポンスに取得できたデータを返す
       res.json({ status: 200, result: latestLog })
     } catch (e) {
       res.json({ status: e.status, message: e.message })
