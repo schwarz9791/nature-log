@@ -105,3 +105,19 @@ dist
 
 # Secret file
 .runtimeconfig.json
+
+# Expo app
+.expo/*
+npm-debug.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+google-services.json
+GoogleService-Info.plist
+
+# macOS
+.DS_Store
