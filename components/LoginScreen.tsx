@@ -27,7 +27,7 @@ const LoginScreen = ({
 
   useEffect(() => {
     if (userLogged) {
-      console.log(userLogged)
+      // console.log(userLogged)
       navigation.push('Main')
     }
   }, [userLogged])
