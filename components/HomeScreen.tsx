@@ -5,15 +5,34 @@ import {
   View,
   ScrollView,
   RefreshControl,
-  Dimensions,
   ActivityIndicator,
 } from 'react-native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { ButtonGroup, Icon } from 'react-native-elements'
-import { LineChart, ProgressChart } from 'react-native-chart-kit'
+import {
+  VictoryChart,
+  VictoryAxis,
+  VictoryTheme,
+  VictoryLine,
+  VictoryArea,
+  VictoryPie,
+  VictoryLabel,
+  VictoryVoronoiContainer,
+} from 'victory-native'
+import { DomainPropType } from 'victory'
+import Svg, {
+  Defs,
+  LinearGradient as SvgLinearGradient,
+  Stop,
+} from 'react-native-svg'
+import { LinearGradient } from 'expo-linear-gradient'
 import dayjs from 'dayjs'
-import hexToRgba from 'hex-to-rgba'
 import { getNatureLogs, NatureLog } from '../lib/fire'
+
+type Chart = {
+  x: string
+  y: number
+}
 
 const wait = (timeout: number) => {
   return new Promise((resolve) => setTimeout(resolve, timeout))
@@ -31,6 +50,7 @@ const HomeScreen = () => {
     setLogs([])
     const res = await getNatureLogs(limit)
     setLogs(res.reverse())
+    // console.log(logs)
   }, [])
 
   const onRefresh = useCallback(() => {
@@ -43,12 +63,9 @@ const HomeScreen = () => {
     })
   }, [])
 
-  const getTimes = useCallback((): string[] => {
-    return logs.map((log, i: number) => {
-      const date = dayjs(log?.created_at?.toDate())
-      return date && (i + 1) % 2 === 1 ? date.format('HH:mm') : ''
-    })
-  }, [logs])
+  const formatDate = useCallback((date: Date) => {
+    return dayjs(date).format('YY/MM/DD HH:mm')
+  }, [])
 
   const getTemperature = useCallback(
     (i: number): number => {
@@ -57,8 +74,11 @@ const HomeScreen = () => {
     [logs]
   )
 
-  const getTemperatures = useCallback((): number[] => {
-    return logs.map((log) => log?.te?.val || 0)
+  const getTemperatures = useCallback((): Chart[] => {
+    return logs.map((log) => ({
+      x: formatDate(log.created_at.toDate()),
+      y: log.te?.val || 0,
+    }))
   }, [logs])
 
   const getHumidity = useCallback(
@@ -68,20 +88,27 @@ const HomeScreen = () => {
     [logs]
   )
 
-  const getHumidities = useCallback((): number[] => {
-    return logs.map((log) => log?.hu?.val || 0)
+  const getHumidities = useCallback((): Chart[] => {
+    return logs.map((log) => ({
+      x: formatDate(log.created_at.toDate()),
+      y: log.hu?.val || 0,
+    }))
   }, [logs])
 
   // 体感温度
   // REF: https://keisan.casio.jp/exec/system/1257417058#!
-  const getFeelingTemperatures = useCallback((): number[] => {
+  const getFeelingTemperatures = useCallback((): Chart[] => {
     return logs.map((log, i: number) => {
       const wv = 0.5 // 風速(m/s)
       const te = getTemperature(i) // 気温
       const hu = getHumidity(i) // 湿度
       const a = 1.76 + Math.pow(1.4 * wv, 0.75) // 風速から導かれるパラメータ
       const denominator = 0.68 - 0.0014 * hu + 1 / a // 式内分母
-      return 37 - (37 - te) / denominator - 0.29 * te * (1 - hu / 100) // ミスナール改良計算式
+      // return 37 - (37 - te) / denominator - 0.29 * te * (1 - hu / 100) // ミスナール改良計算式
+      return {
+        x: formatDate(log.created_at.toDate()),
+        y: 37 - (37 - te) / denominator - 0.29 * te * (1 - hu / 100), // ミスナール改良計算式
+      }
     })
   }, [logs])
 
@@ -145,96 +172,193 @@ const HomeScreen = () => {
     max: number
     data: number
   }) => {
-    const tempRatios = [data / max < 1 ? data / max : 1]
-    const d = Math.round(data * 10) / 10
+    const percent = data / max < 1 ? data / max : 1
+    const ratios = [
+      { x: 1, y: percent },
+      { x: 2, y: 1 - percent },
+    ]
+    const labelData = Math.round(data * 10) / 10
     return (
       <View style={styles.ringWrapper}>
-        <ProgressChart
-          data={tempRatios}
-          width={Dimensions.get('window').width / 3 - 20}
-          height={80}
-          strokeWidth={10}
-          hideLegend
-          chartConfig={{
-            backgroundGradientFrom: '#ffffff',
-            backgroundGradientTo: '#ffffff',
-            color: (opacity = 1) => hexToRgba(color, opacity),
-          }}
-        />
-        <Text style={styles.ringText}>
-          {d}
-          {unit}
-        </Text>
+        <Svg viewBox="0 0 200 200" width="100%" height="100%">
+          <VictoryPie
+            standalone={false}
+            data={[{ x: 1, y: 1 }]}
+            width={200}
+            height={200}
+            innerRadius={80}
+            cornerRadius={20}
+            padding={0}
+            labels={() => null}
+            style={{
+              data: {
+                fill: 'whitesmoke',
+              },
+            }}
+          />
+          <VictoryPie
+            standalone={false}
+            data={ratios}
+            width={200}
+            height={200}
+            innerRadius={80}
+            cornerRadius={20}
+            padding={0}
+            labels={() => null}
+            style={{
+              data: {
+                fill: ({ datum }) => (datum.x === 1 ? color : 'transparent'),
+              },
+            }}
+          />
+          <VictoryLabel
+            textAnchor="middle"
+            verticalAnchor="middle"
+            x={100}
+            y={100}
+            text={`${labelData}${unit}`}
+            style={{ fontSize: 32 }}
+          />
+        </Svg>
       </View>
     )
   }
 
-  const Rings = () => (
-    <View style={styles.rings}>
-      {!logs.length ? (
-        <Loading />
-      ) : (
-        <>
-          <Ring
-            data={getFeelingTemperatures()[0]}
-            color="#6ecc00"
-            unit="℃"
-            max={25}
-          />
-          <Ring data={getTemperature(0)} color="#fb8c00" unit="℃" max={35} />
-          <Ring data={getHumidity(0)} color="#008dfb" unit="％" max={80} />
-        </>
-      )}
-    </View>
-  )
+  const Rings = () => {
+    const lastItemIndex = logs.length - 1
+    return (
+      <View style={styles.rings}>
+        {!logs.length ? (
+          <Loading />
+        ) : (
+          <>
+            <Ring
+              data={getFeelingTemperatures()[lastItemIndex].y}
+              color="#6ecc00"
+              unit="℃"
+              max={25}
+            />
+            <Ring
+              data={getTemperature(lastItemIndex)}
+              color="#fb8c00"
+              unit="℃"
+              max={35}
+            />
+            <Ring
+              data={getHumidity(lastItemIndex)}
+              color="#008dfb"
+              unit="％"
+              max={100}
+            />
+          </>
+        )}
+      </View>
+    )
+  }
 
   const Chart = ({
     color1,
     color2,
     unit,
+    domain,
+    guideLine,
     data,
   }: {
     color1: string
     color2: string
     unit?: string
-    data: number[]
-  }) => (
-    <LineChart
-      data={{
-        labels: getTimes(),
-        datasets: [
-          {
-            data,
-          },
-        ],
-      }}
-      width={Dimensions.get('window').width - 32} // from react-native
-      height={200}
-      yAxisSuffix={unit}
-      // yAxisSuffix="k"
-      yAxisInterval={4} // optional, defaults to 1
-      chartConfig={{
-        backgroundGradientFrom: color1,
-        backgroundGradientTo: color2,
-        decimalPlaces: 1, // optional, defaults to 2dp
-        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-        labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-        style: {
-          borderRadius: 8,
-        },
-        propsForDots: {
-          r: '4',
-          strokeWidth: '2',
-          stroke: color1,
-        },
-      }}
-      bezier
-      style={{
-        marginVertical: 8,
-        borderRadius: 8,
-      }}
-    />
-  )
+    domain?: DomainPropType
+    guideLine: {
+      lower: number
+      upper: number
+    }
+    data: Chart[]
+  }) => {
+    return (
+      // VictoryChartの背景にグラデーションをうまく当てられないため、LinearGradientで背景要素を作成
+      <LinearGradient
+        colors={[color1, color2]}
+        start={{ x: 0, y: 1 }}
+        end={{ x: 1, y: 0 }}
+        style={{ borderRadius: 16 }}
+      >
+        <VictoryChart
+          theme={VictoryTheme.material}
+          height={200}
+          padding={{ top: 20, bottom: 40, left: 50, right: 45 }}
+          containerComponent={
+            <VictoryVoronoiContainer
+              voronoiBlacklist={['upperValue', 'lowerValue']}
+              labels={({ datum }) =>
+                `${datum.x}\n${Math.round(datum.y * 10) / 10}${unit}`
+              }
+            />
+          }
+        >
+          {/* VictoryAreaのfill部分のグラデーション定義 */}
+          <Defs>
+            <SvgLinearGradient
+              id="ChartAreaGradient"
+              x1="0%"
+              y1="0%"
+              x2="0%"
+              y2="100%"
+            >
+              <Stop offset="0%" stopColor="#ffffff" stopOpacity="0.3" />
+              <Stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+            </SvgLinearGradient>
+          </Defs>
+          {/* styleにgridのstrokeDasharrayやticksのsizeを指定すると型エラーが出る */}
+          <VictoryAxis
+            tickCount={5}
+            tickFormat={(x) => x.split(' ')[1]}
+            style={{
+              axis: { stroke: 'white', strokeWidth: 1 },
+              grid: { strokeDasharray: [2, 4] },
+              ticks: { stroke: 'white', size: 0 },
+              tickLabels: { fill: 'white' },
+            }}
+          />
+          <VictoryAxis
+            dependentAxis
+            tickFormat={(x) => `${x}${unit}`}
+            style={{
+              axis: { stroke: 'white', strokeWidth: 1 },
+              grid: { strokeDasharray: [2, 4] },
+              ticks: { stroke: 'white', size: 0 },
+              tickLabels: { fill: 'white' },
+            }}
+          />
+          <VictoryLine
+            name="upperValue"
+            y={() => guideLine.upper}
+            style={{
+              data: { stroke: 'rgba(255, 128, 128, 0.9)', strokeWidth: 1 },
+            }}
+          />
+          <VictoryLine
+            name="lowerValue"
+            y={() => guideLine.lower}
+            style={{
+              data: { stroke: 'rgba(0, 192, 255, 0.9)', strokeWidth: 1 },
+            }}
+          />
+          <VictoryArea
+            data={data}
+            domain={domain}
+            interpolation="natural"
+            style={{
+              data: {
+                stroke: 'rgba(255, 255, 255, 0.5)',
+                fill: 'url(#ChartAreaGradient)',
+                strokeWidth: 4,
+              },
+            }}
+          />
+        </VictoryChart>
+      </LinearGradient>
+    )
+  }
 
   const Charts = () => (
     <View style={styles.chartContainer}>
@@ -247,6 +371,8 @@ const HomeScreen = () => {
             color1="#6ecc00"
             color2="#8ee522"
             unit="℃"
+            domain={{ y: [10, 25] }}
+            guideLine={{ lower: 14.5, upper: 20.5 }}
             data={getFeelingTemperatures()}
           />
           <Text style={styles.chartLabel}>気温</Text>
@@ -254,6 +380,8 @@ const HomeScreen = () => {
             color1="#fb8c00"
             color2="#ffa726"
             unit="℃"
+            domain={{ y: [10, 25] }}
+            guideLine={{ lower: 14.5, upper: 20.5 }}
             data={getTemperatures()}
           />
           <Text style={styles.chartLabel}>湿度</Text>
@@ -261,6 +389,8 @@ const HomeScreen = () => {
             color1="#008dfb"
             color2="#26b1ff"
             unit="％"
+            domain={{ y: [10, 90] }}
+            guideLine={{ lower: 30, upper: 75 }}
             data={getHumidities()}
           />
         </>
@@ -288,9 +418,10 @@ const HomeScreen = () => {
 
   useEffect(() => {
     fetchData()
-    setInterval(() => {
+    const timer = setInterval(() => {
       setCurrentTime(dayjs(new Date()).format('YYYY/MM/DD HH:mm')), 60 * 1000
     })
+    return () => clearInterval(timer)
   }, [])
 
   return (
@@ -331,7 +462,8 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   chartLabel: {
-    marginTop: 16,
+    marginTop: 24,
+    marginBottom: 16,
     textAlign: 'center',
     fontSize: 16,
   },
@@ -347,14 +479,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     height: 112,
+    marginTop: 16,
   },
   ringWrapper: {
-    position: 'relative',
     flex: 1,
-    flexWrap: 'nowrap',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
+    padding: 8,
   },
   ringText: {
     position: 'absolute',

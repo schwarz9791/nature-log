@@ -6,19 +6,19 @@ import 'firebase/firestore'
 export type NatureLog = {
   created_at: firebase.firestore.Timestamp
   hu: {
-    created_at: Date
+    created_at: string
     val: number
   }
   il: {
-    created_at: Date
+    created_at: string
     val: number
   }
   mo: {
-    created_at: Date
+    created_at: string
     val: number
   }
   te: {
-    created_at: Date
+    created_at: string
     val: number
   }
 }
