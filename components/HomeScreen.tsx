@@ -371,8 +371,8 @@ const HomeScreen = () => {
             color1="#6ecc00"
             color2="#8ee522"
             unit="℃"
-            domain={{ y: [10, 30] }}
-            guideLine={{ lower: 15, upper: 25 }}
+            domain={{ y: [10, 25] }}
+            guideLine={{ lower: 14.5, upper: 20.5 }}
             data={getFeelingTemperatures()}
           />
           <Text style={styles.chartLabel}>気温</Text>
@@ -380,8 +380,8 @@ const HomeScreen = () => {
             color1="#fb8c00"
             color2="#ffa726"
             unit="℃"
-            domain={{ y: [10, 30] }}
-            guideLine={{ lower: 15, upper: 25 }}
+            domain={{ y: [10, 25] }}
+            guideLine={{ lower: 14.5, upper: 20.5 }}
             data={getTemperatures()}
           />
           <Text style={styles.chartLabel}>湿度</Text>
