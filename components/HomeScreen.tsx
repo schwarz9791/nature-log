@@ -224,24 +224,37 @@ const HomeScreen = () => {
     )
   }
 
-  const Rings = () => (
-    <View style={styles.rings}>
-      {!logs.length ? (
-        <Loading />
-      ) : (
-        <>
-          <Ring
-            data={getFeelingTemperatures()[0].y}
-            color="#6ecc00"
-            unit="℃"
-            max={25}
-          />
-          <Ring data={getTemperature(0)} color="#fb8c00" unit="℃" max={35} />
-          <Ring data={getHumidity(0)} color="#008dfb" unit="％" max={100} />
-        </>
-      )}
-    </View>
-  )
+  const Rings = () => {
+    const lastItemIndex = logs.length - 1
+    return (
+      <View style={styles.rings}>
+        {!logs.length ? (
+          <Loading />
+        ) : (
+          <>
+            <Ring
+              data={getFeelingTemperatures()[lastItemIndex].y}
+              color="#6ecc00"
+              unit="℃"
+              max={25}
+            />
+            <Ring
+              data={getTemperature(lastItemIndex)}
+              color="#fb8c00"
+              unit="℃"
+              max={35}
+            />
+            <Ring
+              data={getHumidity(lastItemIndex)}
+              color="#008dfb"
+              unit="％"
+              max={100}
+            />
+          </>
+        )}
+      </View>
+    )
+  }
 
   const Chart = ({
     color1,
