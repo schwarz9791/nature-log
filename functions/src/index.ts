@@ -89,6 +89,7 @@ type Appliance = {
 /* eslint-enable camelcase */
 
 const token = functions.config().nature_remo.access_token
+const settingsKey = functions.config().user.settings_key
 const headers = {
   'Content-Type': 'application/json;',
   Authorization: 'Bearer ' + token,
@@ -104,15 +105,31 @@ const fetchAppliances = async () => {
   return data
 }
 
-export const getFirstAirConId = functions
+const storeTargetAirConId = async (id: string) => {
+  await admin.firestore().collection('settings').doc(settingsKey).update({
+    target_aircon_id: id,
+  })
+
+  // output log
+  functions.logger.log({
+    result: `Set target AirCon ID: ${id} succeeded.`,
+  })
+}
+
+export const getAndSaveAirConId = functions
   .region('asia-northeast1')
   .https.onRequest(async (req, res) => {
     try {
+      const index = req.query?.index
+        ? parseInt(req.query.index.toString(), 10)
+        : 0
       const appliances = await fetchAppliances()
-      const firstAircon = appliances.filter(
+      const tergetAircon = appliances.filter(
         (appliance) => appliance.type === 'AC'
-      )[0]
-      res.json({ status: 200, result: firstAircon.id })
+      )[index]
+      // save
+      await storeTargetAirConId(tergetAircon.id)
+      res.json({ status: 200, result: tergetAircon.id })
     } catch (e) {
       res.json({ status: e.status, message: e.message })
     }
