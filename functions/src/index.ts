@@ -26,7 +26,97 @@ type NatureRemoNewestEvents = {
     val: number
   }
 }
+
+type Device = {
+  name: string
+  id: string
+  created_at: string
+  updated_at: string
+  mac_address: string
+  bt_mac_address: string
+  serial_number: string
+  firmware_version: string
+  temperature_offset: number
+  humidity_offset: number
+}
+
+type AirConParams = {
+  temp: string
+  temp_unit: string
+  mode: string
+  vol: string
+  dir: string
+  dirh: string
+  button: string
+  updated_at: string
+}
+
+type ApplianceModal = {
+  id: string
+  country: string
+  manufacturer: string
+  remote_name: string
+  series: string
+  name: string
+  image: string
+}
+
+type Aircon = {}
+type Tv = {}
+type Light = {}
+type SmartMeter = {}
+
+type Signal = {
+  id: string
+  name: string
+  image: string
+}
+
+type Appliance = {
+  id: string
+  device: Device
+  model: ApplianceModal
+  nickname: string
+  image: string
+  type: string
+  settings: AirConParams
+  aircon?: Aircon
+  tv?: Tv
+  light?: Light
+  smart_meter?: SmartMeter
+  signals: Signal[]
+}
 /* eslint-enable camelcase */
+
+const token = functions.config().nature_remo.access_token
+const headers = {
+  'Content-Type': 'application/json;',
+  Authorization: 'Bearer ' + token,
+}
+
+const fetchAppliances = async () => {
+  const url = 'https://api.nature.global/1/appliances'
+  const res = await fetch(url, {
+    method: 'GET',
+    headers,
+  })
+  const data = (await res.json()) as Appliance[]
+  return data
+}
+
+export const getFirstAirConId = functions
+  .region('asia-northeast1')
+  .https.onRequest(async (req, res) => {
+    try {
+      const appliances = await fetchAppliances()
+      const firstAircon = appliances.filter(
+        (appliance) => appliance.type === 'AC'
+      )[0]
+      res.json({ status: 200, result: firstAircon.id })
+    } catch (e) {
+      res.json({ status: e.status, message: e.message })
+    }
+  })
 
 const storeNatureRemoData = async (data: NatureRemoNewestEvents) => {
   const result = await admin
@@ -50,11 +140,6 @@ const storeNatureRemoData = async (data: NatureRemoNewestEvents) => {
 
 const fetchNatureRemoData = async () => {
   const url = 'https://api.nature.global/1/devices'
-  const token = functions.config().nature_remo.access_token
-  const headers = {
-    'Content-Type': 'application/json;',
-    Authorization: 'Bearer ' + token,
-  }
   const res = await fetch(url, {
     method: 'GET',
     headers,
