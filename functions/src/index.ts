@@ -10,19 +10,19 @@ admin.initializeApp()
 /* eslint-disable camelcase */
 type NatureRemoNewestEvents = {
   hu: {
-    created_at: Date
+    created_at: string
     val: number
   }
   il: {
-    created_at: Date
+    created_at: string
     val: number
   }
   mo: {
-    created_at: Date
+    created_at: string
     val: number
   }
   te: {
-    created_at: Date
+    created_at: string
     val: number
   }
 }
