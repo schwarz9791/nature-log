@@ -86,13 +86,39 @@ type Appliance = {
   smart_meter?: SmartMeter
   signals: Signal[]
 }
+
+type Settings = {
+  automation: boolean
+  threshold: {
+    cool: {
+      hu: number
+      te: number
+    }
+    dry: {
+      hu: number
+      te: number
+    }
+    warm: {
+      hu: number
+      te: number
+    }
+  }
+  wind_ve: number
+  target_aircon_id: string
+}
 /* eslint-enable camelcase */
 
 const token = functions.config().nature_remo.access_token
 const settingsKey = functions.config().user.settings_key
 const headers = {
-  'Content-Type': 'application/json;',
+  'Content-Type': 'application/json;charset=UTF-8',
   Authorization: 'Bearer ' + token,
+  accept: 'application/json',
+}
+const postHeaders = {
+  'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+  Authorization: 'Bearer ' + token,
+  accept: 'application/json',
 }
 
 const fetchAppliances = async () => {
@@ -116,6 +142,17 @@ const storeTargetAirConId = async (id: string) => {
   })
 }
 
+const getTargetAirConId = async () => {
+  const snapshot = await admin
+    .firestore()
+    .collection('settings')
+    .doc(settingsKey)
+    .get()
+  const settings = snapshot.data() as Settings
+
+  return settings.target_aircon_id
+}
+
 export const getAndSaveAirConId = functions
   .region('asia-northeast1')
   .https.onRequest(async (req, res) => {
@@ -130,6 +167,54 @@ export const getAndSaveAirConId = functions
       // save
       await storeTargetAirConId(tergetAircon.id)
       res.json({ status: 200, result: tergetAircon.id })
+    } catch (e) {
+      res.json({ status: e.status, message: e.message })
+    }
+  })
+
+export const turnOffAirCon = functions
+  .region('asia-northeast1')
+  .https.onRequest(async (req, res) => {
+    try {
+      const id = await getTargetAirConId()
+      const url = `https://api.nature.global/1/appliances/${id}/aircon_settings`
+      const body = 'button=power-off'
+      await fetch(url, {
+        method: 'POST',
+        headers: postHeaders,
+        body,
+      })
+      res.json({ status: 200, result: 'Turn off AirCon succeeded.' })
+    } catch (e) {
+      res.json({ status: e.status, message: e.message })
+    }
+  })
+
+export const turnOnAirCon = functions
+  .region('asia-northeast1')
+  .https.onRequest(async (req, res) => {
+    try {
+      const id = await getTargetAirConId()
+      const url = `https://api.nature.global/1/appliances/${id}/aircon_settings`
+      let mode = ''
+      switch (req.query.mode) {
+        case 'warm':
+        case 'cool':
+        case 'dry':
+          mode = req.query.mode
+          break
+        default:
+          mode = 'auto'
+      }
+      await fetch(url, {
+        method: 'POST',
+        headers: postHeaders,
+        body: `operation_mode=${mode}`,
+      })
+      res.json({
+        status: 200,
+        result: `Turn on AirCon for ${mode} mode succeeded.`,
+      })
     } catch (e) {
       res.json({ status: e.status, message: e.message })
     }
