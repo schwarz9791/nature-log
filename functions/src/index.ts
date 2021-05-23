@@ -173,10 +173,7 @@ export const getAirConIds = functions
         .map((appliance) => appliance.id)
       res.status(200).json(airConIds)
     } catch (e) {
-      throw new functions.https.HttpsError(
-        'failed-precondition',
-        `message: ${e.message}`
-      )
+      res.status(500).json({ status: 500, message: e.message })
     }
   })
 
@@ -194,7 +191,7 @@ export const turnOffAirCon = functions
       })
       res.status(200).json({ data: 'Turn off AirCon succeeded.' })
     } catch (e) {
-      res.status(500).json({ message: e.message })
+      res.status(500).json({ status: 500, message: e.message })
     }
   })
 
@@ -223,7 +220,7 @@ export const turnOnAirCon = functions
         data: `Turn on AirCon for ${mode} mode succeeded.`,
       })
     } catch (e) {
-      res.status(500).json({ message: e.message })
+      res.status(500).json({ status: 500, message: e.message })
     }
   })
 
@@ -273,7 +270,7 @@ export const getNatureRemoData = functions
       // 直接実行する用のAPIなので、レスポンスに取得できたデータを返す
       res.status(200).json({ data: latestLog })
     } catch (e) {
-      res.status(500).json({ message: e.message })
+      res.status(500).json({ status: 500, message: e.message })
     }
   })
 
