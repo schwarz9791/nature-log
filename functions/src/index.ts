@@ -170,7 +170,11 @@ export const getAirConIds = functions
       const appliances = await fetchAppliances()
       const airConIds = appliances
         .filter((appliance) => appliance.type === 'AC')
-        .map((appliance) => appliance.id)
+        .map((appliance) => ({
+          id: appliance.id,
+          room_name: appliance.device.name,
+          nickname: appliance.nickname,
+        }))
       res.status(200).json(airConIds)
     } catch (e) {
       res.status(500).json({ status: 500, message: e.message })
