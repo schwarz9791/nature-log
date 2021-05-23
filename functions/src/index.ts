@@ -135,11 +135,11 @@ export const putTargetAirConId = functions
   .region('asia-northeast1')
   .https.onRequest(async (req, res) => {
     try {
-      if (req.method !== 'put') throw new Error('Unsupported methods.')
-      if (!req.params?.id) throw new Error('Require id.')
+      if (req.method !== 'PUT') throw new Error('Unsupported methods.')
+      if (!req.body?.id) throw new Error('Require id.')
 
       await admin.firestore().collection('settings').doc(settingsKey).update({
-        target_aircon_id: req.params.id,
+        target_aircon_id: req.body.id,
       })
 
       // output log
@@ -148,10 +148,7 @@ export const putTargetAirConId = functions
       })
       res.status(200).send()
     } catch (e) {
-      throw new functions.https.HttpsError(
-        'failed-precondition',
-        `message: ${e.message}`
-      )
+      res.status(500).json({ status: 500, message: e.message })
     }
   })
 
