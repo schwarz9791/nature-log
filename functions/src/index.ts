@@ -135,6 +135,7 @@ export const putTargetAirConId = functions
   .region('asia-northeast1')
   .https.onRequest(async (req, res) => {
     try {
+      if (req.method !== 'put') throw new Error('Unsupported methods.')
       if (!req.params?.id) throw new Error('Require id.')
 
       await admin.firestore().collection('settings').doc(settingsKey).update({
