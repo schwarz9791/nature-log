@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useContext, useCallback } from 'react'
 import {
   StyleSheet,
   Text,
@@ -28,6 +28,8 @@ import Svg, {
 import { LinearGradient } from 'expo-linear-gradient'
 import dayjs from 'dayjs'
 import { getNatureLogs, NatureLog } from '../lib/fire'
+import mainContext from '../context/mainContext'
+import { TopScreenNavigationProps } from '../App'
 
 type Chart = {
   x: string
@@ -39,6 +41,7 @@ const wait = (timeout: number) => {
 }
 
 const HomeScreen = () => {
+  const { userProfile } = useContext(mainContext)
   const [refreshing, setRefreshing] = useState(false)
   const [logs, setLogs] = useState<NatureLog[]>([])
   const [currentTime, setCurrentTime] = useState(

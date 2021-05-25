@@ -32,6 +32,7 @@ const App = () => {
   const [userLogged, setUserLogged] = useState(false)
   const [userProfile, setUserProfile] = useState<firebase.User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [targetAirConId, setTargetAirConId] = useState('')
 
   const mainC = useMemo(
     () => ({
@@ -51,6 +52,8 @@ const App = () => {
       }) => {
         signInWithGoogle({ navigation })
       },
+      targetAirConId: '',
+      handleSetTargetAirConId: (id: string) => setTargetAirConId(() => id),
     }),
     []
   )
