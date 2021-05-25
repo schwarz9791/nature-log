@@ -23,6 +23,7 @@ module.exports = {
   // plugins: ['import'],
   globals: {
     alert: false,
+    fetch: false,
   },
   rules: {
     'prettier/prettier': [
