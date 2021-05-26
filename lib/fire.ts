@@ -76,11 +76,7 @@ export const getAirConIds = async () => {
 
 export const putAirConId = async (id: string) => {
   try {
-    await fetch(getFuncUrl('putTargetAirConId'), {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify({ id }),
-    })
+    await functions.httpsCallable('putTargetAirConId')({ id })
   } catch (e) {
     console.error(`message: ${e.message}`)
   }

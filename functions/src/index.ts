@@ -138,23 +138,23 @@ const fetchAppliances = async () => {
 
 export const putTargetAirConId = functions
   .region('asia-northeast1')
-  .https.onRequest(async (req, res) => {
-    try {
-      if (req.method !== 'PUT') throw new Error('Unsupported methods.')
-      if (!req.body?.id) throw new Error('Require id.')
+  .https.onCall(async (data, context) => {
+    checkAuth(context)
+    if (!data?.id)
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'Invalid Argument'
+      )
 
-      await admin.firestore().collection('settings').doc(settingsKey).update({
-        target_aircon_id: req.body.id,
-      })
+    await admin.firestore().collection('settings').doc(settingsKey).update({
+      target_aircon_id: data.id,
+    })
 
-      // output log
-      functions.logger.log({
-        result: `Set target AirCon ID: ${req.params.id} succeeded.`,
-      })
-      res.status(200).send()
-    } catch (e) {
-      res.status(500).json({ status: 500, message: e.message })
-    }
+    // output log
+    functions.logger.log({
+      result: `Set target AirCon ID: ${data.id} succeeded.`,
+    })
+    return { result: 'success' }
   })
 
 const getTargetAirConId = async () => {
