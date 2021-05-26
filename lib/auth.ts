@@ -1,7 +1,6 @@
 import * as GoogleAuthentication from 'expo-google-app-auth'
 import Constants from 'expo-constants'
-import firebase from 'firebase'
-import Firebase from './fire'
+import firebase from './fire'
 import { TopScreenNavigationProps } from '../App'
 
 export const signInWithGoogle = async ({
@@ -23,7 +22,8 @@ export const signInWithGoogle = async ({
         result.idToken || '',
         result.accessToken || ''
       )
-      Firebase.auth()
+      firebase
+        .auth()
         .signInWithCredential(credential)
         .then(() => {
           navigation.push('Main')

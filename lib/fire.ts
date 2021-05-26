@@ -1,8 +1,7 @@
 import Constants from 'expo-constants'
 import firebase from 'firebase'
 import 'firebase/firestore'
-// import 'firebase/functions'
-// import functions from '@react-native-firebase/functions'
+import 'firebase/functions'
 
 /* eslint-disable camelcase */
 export type NatureLog = {
@@ -36,9 +35,10 @@ const firebaseConfig = {
   messagingSenderId: Constants.manifest.extra?.messagingSenderId,
   appId: Constants.manifest.extra?.appId,
 }
-const Firebase = firebase.initializeApp(firebaseConfig)
-const db = Firebase.firestore()
-// const functions = firebase.functions(Firebase)
+
+firebase.initializeApp(firebaseConfig)
+const db = firebase.firestore()
+const functions = firebase.app().functions('asia-northeast1')
 
 const getFuncUrl = (func: string) => {
   return `https://asia-northeast1-${firebaseConfig.projectId}.cloudfunctions.net/${func}`
@@ -66,8 +66,8 @@ export const getNatureLogs = async (limit: number) => {
 
 export const getAirConIds = async () => {
   try {
-    const res = await fetch(getFuncUrl('getAirConIds'), { headers })
-    return (await res.json()) as AirConId[]
+    const res = await functions.httpsCallable('getAirConIds')()
+    return res.data as AirConId[]
   } catch (e) {
     console.error(`message: ${e.message}`)
     return []
@@ -86,4 +86,4 @@ export const putAirConId = async (id: string) => {
   }
 }
 
-export default Firebase
+export default firebase

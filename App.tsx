@@ -8,9 +8,7 @@ import {
   StackNavigationProp,
 } from '@react-navigation/stack'
 
-import firebase from 'firebase'
-
-import Firebase from './lib/fire'
+import firebase from './lib/fire'
 import { signInWithGoogle } from './lib/auth'
 
 import mainContext from './context/mainContext'
@@ -42,7 +40,7 @@ const App = () => {
       }: {
         navigation: TopScreenNavigationProps
       }) => {
-        Firebase.auth().signOut()
+        firebase.auth().signOut()
         navigation.popToTop()
       },
       handleSignInWithGoogle: ({
@@ -60,7 +58,7 @@ const App = () => {
   const AppStack = createStackNavigator()
 
   useEffect(() => {
-    const authListener = Firebase.auth().onAuthStateChanged((user) => {
+    const authListener = firebase.auth().onAuthStateChanged((user) => {
       // console.log(user)
       setUserLogged(user ? true : false)
       setIsLoading(false)
