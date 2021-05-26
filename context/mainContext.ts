@@ -9,5 +9,7 @@ const mainContext = createContext({
   }: {
     navigation: TopScreenNavigationProps
   }) => {},
+  targetAirConId: '',
+  handleSetTargetAirConId: (id: string) => {},
 })
 export default mainContext

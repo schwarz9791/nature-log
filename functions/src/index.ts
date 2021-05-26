@@ -121,6 +121,11 @@ const postHeaders = {
   accept: 'application/json',
 }
 
+const checkAuth = (context: functions.https.CallableContext) => {
+  if (!context.auth)
+    throw new functions.https.HttpsError('permission-denied', 'Auth Error')
+}
+
 const fetchAppliances = async () => {
   const url = 'https://api.nature.global/1/appliances'
   const res = await fetch(url, {
@@ -131,16 +136,26 @@ const fetchAppliances = async () => {
   return data
 }
 
-const storeTargetAirConId = async (id: string) => {
-  await admin.firestore().collection('settings').doc(settingsKey).update({
-    target_aircon_id: id,
-  })
+export const putTargetAirConId = functions
+  .region('asia-northeast1')
+  .https.onRequest(async (req, res) => {
+    try {
+      if (req.method !== 'PUT') throw new Error('Unsupported methods.')
+      if (!req.body?.id) throw new Error('Require id.')
 
-  // output log
-  functions.logger.log({
-    result: `Set target AirCon ID: ${id} succeeded.`,
+      await admin.firestore().collection('settings').doc(settingsKey).update({
+        target_aircon_id: req.body.id,
+      })
+
+      // output log
+      functions.logger.log({
+        result: `Set target AirCon ID: ${req.params.id} succeeded.`,
+      })
+      res.status(200).send()
+    } catch (e) {
+      res.status(500).json({ status: 500, message: e.message })
+    }
   })
-}
 
 const getTargetAirConId = async () => {
   const snapshot = await admin
@@ -149,27 +164,23 @@ const getTargetAirConId = async () => {
     .doc(settingsKey)
     .get()
   const settings = snapshot.data() as Settings
-
+  // eslint-disable-next-line camelcase
   return settings.target_aircon_id
 }
 
-export const getAndSaveAirConId = functions
+export const getAirConIds = functions
   .region('asia-northeast1')
-  .https.onRequest(async (req, res) => {
-    try {
-      const index = req.query?.index
-        ? parseInt(req.query.index.toString(), 10)
-        : 0
-      const appliances = await fetchAppliances()
-      const tergetAircon = appliances.filter(
-        (appliance) => appliance.type === 'AC'
-      )[index]
-      // save
-      await storeTargetAirConId(tergetAircon.id)
-      res.json({ status: 200, result: tergetAircon.id })
-    } catch (e) {
-      res.json({ status: e.status, message: e.message })
-    }
+  .https.onCall(async (data, context) => {
+    checkAuth(context)
+    const appliances = await fetchAppliances()
+    const airConIds = appliances
+      .filter((appliance) => appliance.type === 'AC')
+      .map((appliance) => ({
+        id: appliance.id,
+        room_name: appliance.device.name,
+        nickname: appliance.nickname,
+      }))
+    return airConIds
   })
 
 export const turnOffAirCon = functions
@@ -184,9 +195,9 @@ export const turnOffAirCon = functions
         headers: postHeaders,
         body,
       })
-      res.json({ status: 200, result: 'Turn off AirCon succeeded.' })
+      res.status(200).json({ data: 'Turn off AirCon succeeded.' })
     } catch (e) {
-      res.json({ status: e.status, message: e.message })
+      res.status(500).json({ status: 500, message: e.message })
     }
   })
 
@@ -211,12 +222,11 @@ export const turnOnAirCon = functions
         headers: postHeaders,
         body: `operation_mode=${mode}`,
       })
-      res.json({
-        status: 200,
-        result: `Turn on AirCon for ${mode} mode succeeded.`,
+      res.status(200).json({
+        data: `Turn on AirCon for ${mode} mode succeeded.`,
       })
     } catch (e) {
-      res.json({ status: e.status, message: e.message })
+      res.status(500).json({ status: 500, message: e.message })
     }
   })
 
@@ -264,9 +274,9 @@ export const getNatureRemoData = functions
       // Nature Remo APIから値を取得するだけで、firestoreには保存しないようにしておく
       // const result = await storeNatureRemoData(latestLog)
       // 直接実行する用のAPIなので、レスポンスに取得できたデータを返す
-      res.json({ status: 200, result: latestLog })
+      res.status(200).json({ data: latestLog })
     } catch (e) {
-      res.json({ status: e.status, message: e.message })
+      res.status(500).json({ status: 500, message: e.message })
     }
   })
 
