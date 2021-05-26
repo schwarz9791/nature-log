@@ -40,15 +40,6 @@ firebase.initializeApp(firebaseConfig)
 const db = firebase.firestore()
 const functions = firebase.app().functions('asia-northeast1')
 
-const getFuncUrl = (func: string) => {
-  return `https://asia-northeast1-${firebaseConfig.projectId}.cloudfunctions.net/${func}`
-}
-
-const headers = {
-  Accept: 'application/json',
-  'Content-Type': 'application/json',
-}
-
 export const getNatureLogs = async (limit: number) => {
   try {
     const snapshot = await db
