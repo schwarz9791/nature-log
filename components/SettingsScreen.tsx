@@ -18,7 +18,7 @@ import mainContext from '../context/mainContext'
 
 import { putAirConId, AirConId } from '../lib/fire'
 
-type SettingsScreens = 'Settings' | 'TargetAirCon'
+// type SettingsScreens = 'Settings' | 'TargetAirCon'
 
 type SettingsParamList = {
   Settings: undefined
@@ -27,84 +27,88 @@ type SettingsParamList = {
 
 type SettingsNavigatorProps = StackNavigationProp<SettingsParamList, 'Settings'>
 
-const SettingsScreen = () => {
+const SettingsTop = ({
+  navigation,
+}: {
+  navigation: SettingsNavigatorProps
+}) => {
+  const { targetAirConId } = useContext(mainContext)
+  const listData = [
+    { title: 'Select target air conditioner', key: 'TargetAirCon' },
+  ]
+
+  const renderItem = ({ item }: { item: { title: string; key: string } }) => (
+    <View style={styles.flatListItem}>
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate(item.key)
+        }}
+      >
+        <Text style={{ fontSize: 16 }}>{item.title}</Text>
+      </TouchableOpacity>
+    </View>
+  )
+
+  return (
+    <View>
+      <Text>Settings Screen</Text>
+      <Text style={styles.label}>Target AirCon</Text>
+      <FlatList data={listData} renderItem={renderItem} />
+      <Button
+        title={targetAirConId || 'Select AirCon ID'}
+        onPress={() => {
+          navigation.navigate('TargetAirCon')
+        }}
+        style={{ margin: 16 }}
+      />
+    </View>
+  )
+}
+
+const SettingsTargetAirCon = ({
+  navigation,
+}: {
+  navigation: SettingsNavigatorProps
+  options: unknown
+}) => {
   const [airConIds, setAirConIds] = useState<AirConId[]>([])
-  const { targetAirConId, handleSetTargetAirConId } = useContext(mainContext)
+  const { handleSetTargetAirConId } = useContext(mainContext)
 
   const handleGetAirConIds = async () => {
     const airConIds = await getAirConIds()
     setAirConIds(() => airConIds)
   }
 
-  const SettingsTop = ({
-    navigation,
-  }: {
-    navigation: SettingsNavigatorProps
-  }) => {
-    const listData = [
-      { title: 'Select target air conditioner', key: 'TargetAirCon' },
-    ]
-    const renderItem = ({ item }: { item: { title: string; key: string } }) => (
-      <View style={styles.flatListItem}>
-        <TouchableOpacity
-          onPress={() => {
-            navigation.navigate(item.key)
-          }}
-        >
-          <Text style={{ fontSize: 16 }}>{item.title}</Text>
-        </TouchableOpacity>
-      </View>
-    )
+  useEffect(() => {
+    handleGetAirConIds()
+  }, [])
 
-    return (
-      <View>
-        <Text>Settings Screen</Text>
-        <Text style={styles.label}>Target AirCon</Text>
-        <FlatList data={listData} renderItem={renderItem} />
-        <Button
-          title={targetAirConId || 'Select AirCon ID'}
-          onPress={() => {
-            navigation.navigate('TargetAirCon')
-          }}
-        />
-      </View>
-    )
-  }
+  const renderItem = ({ item }: { item: { title: string; key: string } }) => (
+    <View style={styles.flatListItem}>
+      <TouchableOpacity
+        onPress={async () => {
+          handleSetTargetAirConId(item.key)
+          await putAirConId(item.key)
+          navigation.goBack()
+        }}
+      >
+        <Text style={{ fontSize: 16, marginBottom: 8 }}>{item.title}</Text>
+        <Text style={{ fontSize: 12 }}>{item.key}</Text>
+      </TouchableOpacity>
+    </View>
+  )
 
-  const SettingsTargetAirCon = ({
-    navigation,
-  }: {
-    navigation: SettingsNavigatorProps
-  }) => {
-    useEffect(() => {
-      handleGetAirConIds()
-    }, [])
+  if (!airConIds?.length) return null
 
-    const renderItem = ({ item }: { item: { title: string; key: string } }) => (
-      <View style={styles.flatListItem}>
-        <TouchableOpacity
-          onPress={async () => {
-            handleSetTargetAirConId(item.key)
-            await putAirConId(item.key)
-            navigation.goBack()
-          }}
-        >
-          <Text style={{ fontSize: 16, marginBottom: 8 }}>{item.title}</Text>
-          <Text style={{ fontSize: 12 }}>{item.key}</Text>
-        </TouchableOpacity>
-      </View>
-    )
+  const listData = airConIds.map((airCon) => ({
+    title: `${airCon.room_name} ${airCon.nickname}`,
+    key: airCon.id,
+  }))
 
-    if (!airConIds?.length) return null
+  return <FlatList data={listData} renderItem={renderItem} />
+}
 
-    const listData = airConIds.map((airCon) => ({
-      title: `${airCon.room_name} ${airCon.nickname}`,
-      key: airCon.id,
-    }))
-
-    return <FlatList data={listData} renderItem={renderItem} />
-  }
-
+const SettingsScreen = () => {
   const SettingsStack = createStackNavigator()
 
   return (
