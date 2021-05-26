@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useCallback } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import {
   StyleSheet,
   Text,
@@ -28,8 +28,6 @@ import Svg, {
 import { LinearGradient } from 'expo-linear-gradient'
 import dayjs from 'dayjs'
 import { getNatureLogs, NatureLog } from '../lib/fire'
-import mainContext from '../context/mainContext'
-import { TopScreenNavigationProps } from '../App'
 
 type Chart = {
   x: string
@@ -40,8 +38,7 @@ const wait = (timeout: number) => {
   return new Promise((resolve) => setTimeout(resolve, timeout))
 }
 
-const HomeScreen = () => {
-  const { userProfile } = useContext(mainContext)
+const LogsScreen = () => {
   const [refreshing, setRefreshing] = useState(false)
   const [logs, setLogs] = useState<NatureLog[]>([])
   const [currentTime, setCurrentTime] = useState(
@@ -59,9 +56,8 @@ const HomeScreen = () => {
   const onRefresh = useCallback(() => {
     setRefreshing(true)
     wait(2000).then(async () => {
-      await fetchData(
-        2 - selectedIndex ? (2 - selectedIndex) * 24 * 4 : undefined
-      )
+      const index = 2 - selectedIndex
+      await fetchData(index ? index * 24 * 4 : undefined)
       setRefreshing(false)
     })
   }, [])
@@ -401,7 +397,15 @@ const HomeScreen = () => {
     </View>
   )
 
-  const Logs = () => (
+  useEffect(() => {
+    fetchData()
+    const timer = setInterval(() => {
+      setCurrentTime(dayjs(new Date()).format('YYYY/MM/DD HH:mm')), 60 * 1000
+    })
+    return () => clearInterval(timer)
+  }, [])
+
+  return (
     <ScrollView
       contentContainerStyle={styles.scrollView}
       refreshControl={
@@ -416,22 +420,16 @@ const HomeScreen = () => {
       <Charts />
     </ScrollView>
   )
+}
 
+const HomeScreen = () => {
   const HomeStack = createStackNavigator()
-
-  useEffect(() => {
-    fetchData()
-    const timer = setInterval(() => {
-      setCurrentTime(dayjs(new Date()).format('YYYY/MM/DD HH:mm')), 60 * 1000
-    })
-    return () => clearInterval(timer)
-  }, [])
 
   return (
     <HomeStack.Navigator>
       <HomeStack.Screen
         name="Logs"
-        component={Logs}
+        component={LogsScreen}
         options={({ navigation }) => ({
           title: 'Nature Log',
           headerLeft: () => (
