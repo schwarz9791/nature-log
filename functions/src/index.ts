@@ -163,6 +163,7 @@ const getTargetAirConId = async () => {
     .doc(settingsKey)
     .get()
   const settings = snapshot.data() as Settings
+  functions.logger.log(settings)
   // eslint-disable-next-line camelcase
   return settings.target_aircon_id
 }
@@ -195,7 +196,7 @@ export const turnOffAirCon = functions
       body,
     })
 
-    const message = `Set target AirCon ID: ${data.id} succeeded.`
+    const message = `Turn on AirCon succeeded.`
     // output log
     functions.logger.log({ message })
     return { result: 'succeeded', message }
@@ -208,7 +209,7 @@ export const turnOnAirCon = functions
     const id = await getTargetAirConId()
     const url = `https://api.nature.global/1/appliances/${id}/aircon_settings`
     let mode = ''
-    switch (data.mode) {
+    switch (data?.mode) {
       case 'warm':
       case 'cool':
       case 'dry':
