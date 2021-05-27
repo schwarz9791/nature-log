@@ -138,23 +138,22 @@ const fetchAppliances = async () => {
 
 export const putTargetAirConId = functions
   .region('asia-northeast1')
-  .https.onRequest(async (req, res) => {
-    try {
-      if (req.method !== 'PUT') throw new Error('Unsupported methods.')
-      if (!req.body?.id) throw new Error('Require id.')
+  .https.onCall(async (data, context) => {
+    checkAuth(context)
+    if (!data?.id)
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'Invalid Argument'
+      )
 
-      await admin.firestore().collection('settings').doc(settingsKey).update({
-        target_aircon_id: req.body.id,
-      })
+    await admin.firestore().collection('settings').doc(settingsKey).update({
+      target_aircon_id: data.id,
+    })
 
-      // output log
-      functions.logger.log({
-        result: `Set target AirCon ID: ${req.params.id} succeeded.`,
-      })
-      res.status(200).send()
-    } catch (e) {
-      res.status(500).json({ status: 500, message: e.message })
-    }
+    const message = `Set target AirCon ID: ${data.id} succeeded.`
+    // output log
+    functions.logger.log({ message })
+    return { result: 'succeeded', message }
   })
 
 const getTargetAirConId = async () => {
@@ -164,6 +163,7 @@ const getTargetAirConId = async () => {
     .doc(settingsKey)
     .get()
   const settings = snapshot.data() as Settings
+  functions.logger.log(settings)
   // eslint-disable-next-line camelcase
   return settings.target_aircon_id
 }
@@ -185,49 +185,49 @@ export const getAirConIds = functions
 
 export const turnOffAirCon = functions
   .region('asia-northeast1')
-  .https.onRequest(async (req, res) => {
-    try {
-      const id = await getTargetAirConId()
-      const url = `https://api.nature.global/1/appliances/${id}/aircon_settings`
-      const body = 'button=power-off'
-      await fetch(url, {
-        method: 'POST',
-        headers: postHeaders,
-        body,
-      })
-      res.status(200).json({ data: 'Turn off AirCon succeeded.' })
-    } catch (e) {
-      res.status(500).json({ status: 500, message: e.message })
-    }
+  .https.onCall(async (data, context) => {
+    checkAuth(context)
+    const id = await getTargetAirConId()
+    const url = `https://api.nature.global/1/appliances/${id}/aircon_settings`
+    const body = 'button=power-off'
+    await fetch(url, {
+      method: 'POST',
+      headers: postHeaders,
+      body,
+    })
+
+    const message = `Turn on AirCon succeeded.`
+    // output log
+    functions.logger.log({ message })
+    return { result: 'succeeded', message }
   })
 
 export const turnOnAirCon = functions
   .region('asia-northeast1')
-  .https.onRequest(async (req, res) => {
-    try {
-      const id = await getTargetAirConId()
-      const url = `https://api.nature.global/1/appliances/${id}/aircon_settings`
-      let mode = ''
-      switch (req.query.mode) {
-        case 'warm':
-        case 'cool':
-        case 'dry':
-          mode = req.query.mode
-          break
-        default:
-          mode = 'auto'
-      }
-      await fetch(url, {
-        method: 'POST',
-        headers: postHeaders,
-        body: `operation_mode=${mode}`,
-      })
-      res.status(200).json({
-        data: `Turn on AirCon for ${mode} mode succeeded.`,
-      })
-    } catch (e) {
-      res.status(500).json({ status: 500, message: e.message })
+  .https.onCall(async (data, context) => {
+    checkAuth(context)
+    const id = await getTargetAirConId()
+    const url = `https://api.nature.global/1/appliances/${id}/aircon_settings`
+    let mode = ''
+    switch (data?.mode) {
+      case 'warm':
+      case 'cool':
+      case 'dry':
+        mode = data.mode
+        break
+      default:
+        mode = 'auto'
     }
+    await fetch(url, {
+      method: 'POST',
+      headers: postHeaders,
+      body: `operation_mode=${mode}`,
+    })
+
+    const message = `Turn on AirCon for ${mode} mode succeeded.`
+    // output log
+    functions.logger.log({ message })
+    return { result: 'succeeded', message }
   })
 
 const storeNatureRemoData = async (data: NatureRemoNewestEvents) => {

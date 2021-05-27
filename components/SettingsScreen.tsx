@@ -5,6 +5,7 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
+  Dimensions,
 } from 'react-native'
 import {
   createStackNavigator,
@@ -16,7 +17,7 @@ import { DrawerProps } from './DrawerMenu'
 
 import mainContext from '../context/mainContext'
 
-import { putAirConId, AirConId } from '../lib/fire'
+import { putAirConId, turnOnAirCon, turnOffAirCon, AirConId } from '../lib/fire'
 
 // type SettingsScreens = 'Settings' | 'TargetAirCon'
 
@@ -32,7 +33,6 @@ const SettingsTop = ({
 }: {
   navigation: SettingsNavigatorProps
 }) => {
-  const { targetAirConId } = useContext(mainContext)
   const listData = [
     { title: 'Select target air conditioner', key: 'TargetAirCon' },
   ]
@@ -50,17 +50,21 @@ const SettingsTop = ({
   )
 
   return (
-    <View>
-      <Text>Settings Screen</Text>
+    <View style={styles.container}>
       <Text style={styles.label}>Target AirCon</Text>
       <FlatList data={listData} renderItem={renderItem} />
-      <Button
-        title={targetAirConId || 'Select AirCon ID'}
-        onPress={() => {
-          navigation.navigate('TargetAirCon')
-        }}
-        style={{ margin: 16 }}
-      />
+      <View style={styles.buttons}>
+        <Button
+          title="Turn On"
+          onPress={async () => await turnOnAirCon('cool')}
+          style={{ margin: 16 }}
+        />
+        <Button
+          title="Turn Off"
+          onPress={async () => await turnOffAirCon()}
+          style={{ margin: 16 }}
+        />
+      </View>
     </View>
   )
 }
@@ -138,8 +142,9 @@ const SettingsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    backgroundColor: '#fff',
   },
   label: {
     marginTop: 16,
@@ -148,10 +153,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   flatListItem: {
+    width: Dimensions.get('window').width,
     backgroundColor: '#fff',
     borderBottomColor: '#ddd',
     borderBottomWidth: 1,
     padding: 16,
+  },
+  buttons: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    width: Dimensions.get('window').width,
   },
 })
 
