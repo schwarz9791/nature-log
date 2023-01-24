@@ -6,7 +6,7 @@ import {
   Keyboard,
 } from 'react-native'
 
-import { /* TextInput, */ SocialIcon } from 'react-native-elements'
+import { /* TextInput, */ SocialIcon } from '@rneui/themed'
 // import loc from '../utils/localization';
 import mainContext from '../context/mainContext'
 import { TopScreenNavigationProps } from '../App'

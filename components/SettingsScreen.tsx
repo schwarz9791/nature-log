@@ -11,7 +11,7 @@ import {
   createStackNavigator,
   StackNavigationProp,
 } from '@react-navigation/stack'
-import { Icon, Button } from 'react-native-elements'
+import { Icon, Button } from '@rneui/themed'
 import { getAirConIds } from '../lib/fire'
 import { DrawerProps } from './DrawerMenu'
 

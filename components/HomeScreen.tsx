@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native'
 import { createStackNavigator } from '@react-navigation/stack'
-import { ButtonGroup, Icon } from 'react-native-elements'
+import { ButtonGroup, Icon } from '@rneui/themed'
 import {
   VictoryChart,
   VictoryAxis,

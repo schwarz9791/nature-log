@@ -80,7 +80,7 @@ const App = () => {
     <mainContext.Provider value={mainC}>
       <SafeAreaProvider>
         <NavigationContainer>
-          <AppStack.Navigator initialRouteName="Login" headerMode="none">
+          <AppStack.Navigator initialRouteName="Login">
             <AppStack.Screen name="Login">
               {(props) => <LoginScreen userLogged {...props} />}
             </AppStack.Screen>
