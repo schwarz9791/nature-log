@@ -105,6 +105,7 @@ type Settings = {
   }
   wind_ve: number
   target_aircon_id: string
+  target_device_id: string
 }
 /* eslint-enable camelcase */
 
@@ -148,6 +149,7 @@ export const putTargetAirConId = functions
 
     await admin.firestore().collection('settings').doc(settingsKey).update({
       target_aircon_id: data.id,
+      target_device_id: data.device.id,
     })
 
     const message = `Set target AirCon ID: ${data.id} succeeded.`
@@ -168,6 +170,18 @@ const getTargetAirConId = async () => {
   return settings.target_aircon_id
 }
 
+const getTargetDeviceId = async () => {
+  const snapshot = await admin
+    .firestore()
+    .collection('settings')
+    .doc(settingsKey)
+    .get()
+  const settings = snapshot.data() as Settings
+  functions.logger.log(settings)
+  // eslint-disable-next-line camelcase
+  return settings.target_device_id
+}
+
 export const getAirConIds = functions
   .region('asia-northeast1')
   .https.onCall(async (data, context) => {
@@ -177,6 +191,7 @@ export const getAirConIds = functions
       .filter((appliance) => appliance.type === 'AC')
       .map((appliance) => ({
         id: appliance.id,
+        deviceId: appliance.device.id,
         room_name: appliance.device.name,
         nickname: appliance.nickname,
       }))
@@ -257,13 +272,16 @@ const fetchNatureRemoData = async () => {
     headers,
   })
   const data = await res.json()
+  const deviceId = await getTargetDeviceId()
 
   // output log
   functions.logger.info(
     `Get NatureRemo data succeeded. ${JSON.stringify(data)}`
   )
 
-  return data[0].newest_events as NatureRemoNewestEvents
+  // TODO: とりあえずSettingsで選択しているデバイスの最新ログを取得、全デバイスのログを保存するようにしたい
+  return data.filter((d: Device) => d.id === deviceId)[0]
+    .newest_events as NatureRemoNewestEvents
 }
 
 export const getNatureRemoData = functions
