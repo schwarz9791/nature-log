@@ -121,3 +121,6 @@ GoogleService-Info.plist
 
 # macOS
 .DS_Store
+
+# Firebase Admin SDK
+*-firebase-adminsdk-*.json
