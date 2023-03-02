@@ -82,7 +82,7 @@ const App = () => {
         <NavigationContainer>
           <AppStack.Navigator initialRouteName="Login">
             <AppStack.Screen name="Login">
-              {(props) => <LoginScreen userLogged {...props} />}
+              {(props) => <LoginScreen userLogged={userLogged} {...props} />}
             </AppStack.Screen>
             <AppStack.Screen name="Main" component={AppDrawer} />
           </AppStack.Navigator>
