@@ -86,6 +86,8 @@ const LoginScreen = ({
           onPress={() => promptAsync()}
           style={{
             paddingHorizontal: 16,
+            width: 200,
+            height: 48,
           }}
         />
       </View>
