@@ -8,8 +8,12 @@ import {
   StackNavigationProp,
 } from '@react-navigation/stack'
 
+import { maybeCompleteAuthSession } from 'expo-web-browser'
+import * as Google from 'expo-auth-session/providers/google'
+import Constants from 'expo-constants'
+
 import firebase from './lib/fire'
-import { signInWithGoogle } from './lib/auth'
+// import { signInWithGoogle } from './lib/auth'
 
 import mainContext from './context/mainContext'
 
@@ -25,6 +29,8 @@ export type TopScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
   'Login'
 >
+
+maybeCompleteAuthSession()
 
 const App = () => {
   const [userLogged, setUserLogged] = useState(false)
@@ -43,19 +49,22 @@ const App = () => {
         firebase.auth().signOut()
         navigation.popToTop()
       },
-      handleSignInWithGoogle: ({
-        navigation,
-      }: {
-        navigation: TopScreenNavigationProps
-      }) => {
-        signInWithGoogle({ navigation })
-      },
+      // handleSignInWithGoogle: ({
+      //   navigation,
+      // }: {
+      //   navigation: TopScreenNavigationProps
+      // }) => {
+      //   signInWithGoogle({ navigation })
+      // },
       targetAirConId: '',
       handleSetTargetAirConId: (id: string) => setTargetAirConId(() => id),
     }),
     []
   )
   const AppStack = createStackNavigator()
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    clientId: Constants.manifest?.extra?.webClientId,
+  })
 
   useEffect(() => {
     const authListener = firebase.auth().onAuthStateChanged((user) => {
@@ -66,6 +75,18 @@ const App = () => {
     })
     return authListener
   }, [])
+
+  useEffect(() => {
+    if (response?.type === 'success') {
+      console.log(response)
+      const { id_token, access_token } = response.params
+      const credential = firebase.auth.GoogleAuthProvider.credential(
+        id_token || '',
+        access_token || ''
+      )
+      firebase.auth().signInWithCredential(credential)
+    }
+  }, [response])
 
   if (isLoading) {
     // Checking if already logged in
@@ -82,7 +103,13 @@ const App = () => {
         <NavigationContainer>
           <AppStack.Navigator initialRouteName="Login">
             <AppStack.Screen name="Login">
-              {(props) => <LoginScreen userLogged={userLogged} {...props} />}
+              {(props) => (
+                <LoginScreen
+                  userLogged={userLogged}
+                  promptAsync={promptAsync}
+                  {...props}
+                />
+              )}
             </AppStack.Screen>
             <AppStack.Screen name="Main" component={AppDrawer} />
           </AppStack.Navigator>
