@@ -1,4 +1,4 @@
-import React, { /* useState, */ useContext, useEffect } from 'react'
+import React, { /* useState, useContext, */ useEffect } from 'react'
 import {
   View,
   StyleSheet,
@@ -8,17 +8,19 @@ import {
 
 import { /* TextInput, */ SocialIcon } from '@rneui/themed'
 // import loc from '../utils/localization';
-import mainContext from '../context/mainContext'
+// import mainContext from '../context/mainContext'
 import { TopScreenNavigationProps } from '../App'
 
 const LoginScreen = ({
   navigation,
   userLogged,
+  promptAsync,
 }: {
   navigation: TopScreenNavigationProps
   userLogged: boolean
+  promptAsync: Function
 }) => {
-  const { handleSignInWithGoogle } = useContext(mainContext)
+  // const { handleSignInWithGoogle } = useContext(mainContext)
   // const [name, setName] = useState('')
   // const [email, setEmail] = useState('')
   // const [password, setPassword] = useState('')
@@ -80,9 +82,12 @@ const LoginScreen = ({
           iconColor="white"
           raised={false}
           iconSize={16}
-          onPress={() => handleSignInWithGoogle({ navigation })}
+          // onPress={() => handleSignInWithGoogle({ navigation })}
+          onPress={() => promptAsync()}
           style={{
             paddingHorizontal: 16,
+            width: 200,
+            height: 48,
           }}
         />
       </View>

@@ -22,7 +22,7 @@ export default {
     storageBucket: process.env.STORAGE_BUCKET,
     messagingSenderId: process.env.MESSAGING_SENDER_ID,
     appId: process.env.APP_ID,
-    webKey: process.env.WEB_KEY,
+    webClientId: process.env.WEB_CLIENT_ID,
     iosClientId: process.env.IOS_CLIENT_ID,
     androidClientId: process.env.ANDROID_CLIENT_ID,
   },
