@@ -1,6 +1,7 @@
 import 'dotenv/config'
 
 export default {
+  scheme: 'nature-log',
   ios: {
     bundleIdentifier: 'tech.sukima.nature-log',
     config: {
@@ -28,5 +29,11 @@ export default {
     eas: {
       projectId: 'f72d1397-7f8d-48f6-a68c-aee29f695716',
     },
+  },
+  updates: {
+    url: 'https://u.expo.dev/f72d1397-7f8d-48f6-a68c-aee29f695716',
+  },
+  runtimeVersion: {
+    policy: 'sdkVersion',
   },
 }

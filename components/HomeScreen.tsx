@@ -398,11 +398,15 @@ const LogsScreen = () => {
   )
 
   useEffect(() => {
+    const controller = new AbortController()
     fetchData()
     const timer = setInterval(() => {
       setCurrentTime(dayjs(new Date()).format('YYYY/MM/DD HH:mm')), 60 * 1000
     })
-    return () => clearInterval(timer)
+    return () => {
+      controller.abort()
+      clearInterval(timer)
+    }
   }, [])
 
   return (
