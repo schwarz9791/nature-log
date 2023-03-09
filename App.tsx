@@ -9,6 +9,7 @@ import {
 } from '@react-navigation/stack'
 
 import { maybeCompleteAuthSession } from 'expo-web-browser'
+import { makeRedirectUri } from 'expo-auth-session'
 import * as Google from 'expo-auth-session/providers/google'
 import Constants from 'expo-constants'
 
@@ -63,7 +64,11 @@ const App = () => {
   )
   const AppStack = createStackNavigator()
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    clientId: Constants.manifest?.extra?.webClientId,
+    clientId: Constants.expoConfig?.extra?.webClientId,
+    scopes: ['profile', 'email'],
+    redirectUri: makeRedirectUri({
+      scheme: 'https://auth.expo.io/@masakichi/nature-log/start',
+    }),
   })
 
   useEffect(() => {
