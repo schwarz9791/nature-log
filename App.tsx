@@ -110,7 +110,11 @@ const App = () => {
                 />
               )}
             </AppStack.Screen>
-            <AppStack.Screen name="Main" component={AppDrawer} />
+            <AppStack.Screen
+              name="Main"
+              component={AppDrawer}
+              options={{ headerShown: false }}
+            />
           </AppStack.Navigator>
         </NavigationContainer>
         <StatusBar />

@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native'
 import { createStackNavigator } from '@react-navigation/stack'
-import { ButtonGroup, Icon } from '@rneui/themed'
+import { ButtonGroup } from '@rneui/themed'
 import {
   VictoryChart,
   VictoryAxis,
@@ -434,16 +434,17 @@ const HomeScreen = () => {
       <HomeStack.Screen
         name="Logs"
         component={LogsScreen}
-        options={({ navigation }) => ({
-          title: 'Nature Log',
-          headerLeft: () => (
-            <Icon
-              name="menu"
-              style={{ marginHorizontal: 16 }}
-              onPress={() => navigation.toggleDrawer()}
-            />
-          ),
-        })}
+        options={{ headerShown: false }}
+        // options={({ navigation }) => ({
+        //   title: 'Nature Log',
+        //   headerLeft: () => (
+        //     <Icon
+        //       name="menu"
+        //       style={{ marginHorizontal: 16 }}
+        //       onPress={() => navigation.toggleDrawer()}
+        //     />
+        //   ),
+        // })}
       ></HomeStack.Screen>
     </HomeStack.Navigator>
   )
