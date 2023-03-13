@@ -72,13 +72,13 @@ const App = () => {
   })
 
   useEffect(() => {
-    const authListener = firebase.auth().onAuthStateChanged((user) => {
+    const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
       // console.log(user)
       setUserLogged(user ? true : false)
       setIsLoading(false)
       setUserProfile(user)
     })
-    return authListener
+    return () => unsubscribe()
   }, [])
 
   useEffect(() => {
