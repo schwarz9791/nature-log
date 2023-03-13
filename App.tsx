@@ -77,7 +77,7 @@ const App = () => {
 
   useEffect(() => {
     if (response?.type === 'success') {
-      console.log(response)
+      // console.log(response)
       const { id_token, access_token } = response.params
       const credential = firebase.auth.GoogleAuthProvider.credential(
         id_token || '',
