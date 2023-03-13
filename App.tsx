@@ -33,28 +33,12 @@ const App = () => {
   const [userLogged, setUserLogged] = useState(false)
   const [userProfile, setUserProfile] = useState<firebase.User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [targetAirConId, setTargetAirConId] = useState('')
+  // const [targetAirConId, setTargetAirConId] = useState('')
 
   const mainC = useMemo(
     () => ({
       userProfile: { userProfile },
-      signOutUser: ({
-        navigation,
-      }: {
-        navigation: TopScreenNavigationProps
-      }) => {
-        firebase.auth().signOut()
-        navigation.popToTop()
-      },
-      // handleSignInWithGoogle: ({
-      //   navigation,
-      // }: {
-      //   navigation: TopScreenNavigationProps
-      // }) => {
-      //   signInWithGoogle({ navigation })
-      // },
       targetAirConId: '',
-      handleSetTargetAirConId: (id: string) => setTargetAirConId(() => id),
     }),
     []
   )
