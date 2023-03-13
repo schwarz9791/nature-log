@@ -1,15 +1,18 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import {
   createDrawerNavigator,
   DrawerContentScrollView,
   DrawerItemList,
   DrawerItem,
   DrawerNavigationProp,
+  DrawerContentComponentProps,
 } from '@react-navigation/drawer'
+
+import firebase from '../lib/fire'
 
 import HomeScreen from './HomeScreen'
 import SettingsScreen from './SettingsScreen'
-import mainContext from '../context/mainContext'
+// import mainContext from '../context/mainContext'
 
 type DrawerParamList = {
   Home: undefined
@@ -18,12 +21,18 @@ type DrawerParamList = {
 
 export type DrawerProps = DrawerNavigationProp<DrawerParamList, 'Home'>
 
-export const DrawerContent = (props) => {
-  const { signOutUser } = useContext(mainContext)
+export const DrawerContent = (props: DrawerContentComponentProps) => {
+  // const { signOutUser } = useContext(mainContext)
   return (
     <DrawerContentScrollView {...props}>
       <DrawerItemList {...props} />
-      <DrawerItem label="Logout" onPress={() => signOutUser(props)} />
+      <DrawerItem
+        label="Logout"
+        onPress={() => {
+          firebase.auth().signOut()
+          props.navigation.getParent()?.navigate('Login')
+        }}
+      />
     </DrawerContentScrollView>
   )
 }

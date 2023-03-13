@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   View,
   Text,
@@ -11,22 +11,25 @@ import {
   createStackNavigator,
   StackNavigationProp,
 } from '@react-navigation/stack'
-import { Icon, Button } from '@rneui/themed'
+import { Button } from '@rneui/themed'
 import { getAirConIds } from '../lib/fire'
-import { DrawerProps } from './DrawerMenu'
+// import { DrawerProps } from './DrawerMenu'
 
-import mainContext from '../context/mainContext'
+// import mainContext from '../context/mainContext'
 
 import { putAirConId, turnOnAirCon, turnOffAirCon, AirConId } from '../lib/fire'
 
 // type SettingsScreens = 'Settings' | 'TargetAirCon'
 
 type SettingsParamList = {
-  Settings: undefined
+  SettingsTop: undefined
   TargetAirCon: undefined
 }
 
-type SettingsNavigatorProps = StackNavigationProp<SettingsParamList, 'Settings'>
+type SettingsNavigatorProps = StackNavigationProp<
+  SettingsParamList,
+  'SettingsTop'
+>
 
 const SettingsTop = ({
   navigation,
@@ -73,10 +76,9 @@ const SettingsTargetAirCon = ({
   navigation,
 }: {
   navigation: SettingsNavigatorProps
-  options: unknown
 }) => {
   const [airConIds, setAirConIds] = useState<AirConId[]>([])
-  const { handleSetTargetAirConId } = useContext(mainContext)
+  // const { handleSetTargetAirConId } = useContext(mainContext)
 
   const handleGetAirConIds = async () => {
     const airConIds = await getAirConIds()
@@ -91,7 +93,7 @@ const SettingsTargetAirCon = ({
     <View style={styles.flatListItem}>
       <TouchableOpacity
         onPress={async () => {
-          handleSetTargetAirConId(item.key)
+          // handleSetTargetAirConId(item.key)
           await putAirConId(item.key)
           navigation.goBack()
         }}
@@ -101,8 +103,6 @@ const SettingsTargetAirCon = ({
       </TouchableOpacity>
     </View>
   )
-
-  if (!airConIds?.length) return null
 
   const listData = airConIds.map((airCon) => ({
     title: `${airCon.room_name} ${airCon.nickname}`,
@@ -118,18 +118,9 @@ const SettingsScreen = () => {
   return (
     <SettingsStack.Navigator>
       <SettingsStack.Screen
-        name="Settings"
+        name="SettingsTop"
         component={SettingsTop}
-        options={({ navigation }: { navigation: DrawerProps }) => ({
-          title: 'Nature Log',
-          headerLeft: () => (
-            <Icon
-              name="menu"
-              style={{ marginHorizontal: 16 }}
-              onPress={() => navigation.toggleDrawer()}
-            />
-          ),
-        })}
+        options={{ headerShown: false }}
       />
       <SettingsStack.Screen
         name="TargetAirCon"

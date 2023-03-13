@@ -33,28 +33,12 @@ const App = () => {
   const [userLogged, setUserLogged] = useState(false)
   const [userProfile, setUserProfile] = useState<firebase.User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [targetAirConId, setTargetAirConId] = useState('')
+  // const [targetAirConId, setTargetAirConId] = useState('')
 
   const mainC = useMemo(
     () => ({
       userProfile: { userProfile },
-      signOutUser: ({
-        navigation,
-      }: {
-        navigation: TopScreenNavigationProps
-      }) => {
-        firebase.auth().signOut()
-        navigation.popToTop()
-      },
-      // handleSignInWithGoogle: ({
-      //   navigation,
-      // }: {
-      //   navigation: TopScreenNavigationProps
-      // }) => {
-      //   signInWithGoogle({ navigation })
-      // },
       targetAirConId: '',
-      handleSetTargetAirConId: (id: string) => setTargetAirConId(() => id),
     }),
     []
   )
@@ -77,7 +61,7 @@ const App = () => {
 
   useEffect(() => {
     if (response?.type === 'success') {
-      console.log(response)
+      // console.log(response)
       const { id_token, access_token } = response.params
       const credential = firebase.auth.GoogleAuthProvider.credential(
         id_token || '',
@@ -110,7 +94,11 @@ const App = () => {
                 />
               )}
             </AppStack.Screen>
-            <AppStack.Screen name="Main" component={AppDrawer} />
+            <AppStack.Screen
+              name="Main"
+              component={AppDrawer}
+              options={{ headerShown: false }}
+            />
           </AppStack.Navigator>
         </NavigationContainer>
         <StatusBar />
