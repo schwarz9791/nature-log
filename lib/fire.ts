@@ -30,12 +30,12 @@ type Mode = 'warm' | 'cool' | 'dry' | 'auto'
 /* eslint-enable camelcase */
 
 const firebaseConfig = {
-  apiKey: Constants.expoConfig.extra?.apiKey,
-  authDomain: Constants.expoConfig.extra?.authDomain,
-  projectId: Constants.expoConfig.extra?.projectId,
-  storageBucket: Constants.expoConfig.extra?.storageBucket,
-  messagingSenderId: Constants.expoConfig.extra?.messagingSenderId,
-  appId: Constants.expoConfig.extra?.appId,
+  apiKey: Constants.expoConfig?.extra?.apiKey,
+  authDomain: Constants.expoConfig?.extra?.authDomain,
+  projectId: Constants.expoConfig?.extra?.projectId,
+  storageBucket: Constants.expoConfig?.extra?.storageBucket,
+  messagingSenderId: Constants.expoConfig?.extra?.messagingSenderId,
+  appId: Constants.expoConfig?.extra?.appId,
 }
 
 firebase.initializeApp(firebaseConfig)
