@@ -8,8 +8,6 @@ import {
   StackNavigationProp,
 } from '@react-navigation/stack'
 
-import { maybeCompleteAuthSession } from 'expo-web-browser'
-import { makeRedirectUri } from 'expo-auth-session'
 import * as Google from 'expo-auth-session/providers/google'
 import Constants from 'expo-constants'
 
@@ -30,8 +28,6 @@ export type TopScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
   'Login'
 >
-
-maybeCompleteAuthSession()
 
 const App = () => {
   const [userLogged, setUserLogged] = useState(false)
@@ -64,21 +60,19 @@ const App = () => {
   )
   const AppStack = createStackNavigator()
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    clientId: Constants.expoConfig?.extra?.webClientId,
-    scopes: ['profile', 'email'],
-    redirectUri: makeRedirectUri({
-      scheme: 'https://auth.expo.io/@masakichi/nature-log/start',
-    }),
+    expoClientId: Constants.expoConfig?.extra?.webClientId,
+    iosClientId: Constants.expoConfig?.extra?.iosClientId,
+    androidClientId: Constants.expoConfig?.extra?.androidClientId,
   })
 
   useEffect(() => {
-    const authListener = firebase.auth().onAuthStateChanged((user) => {
+    const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
       // console.log(user)
       setUserLogged(user ? true : false)
       setIsLoading(false)
       setUserProfile(user)
     })
-    return authListener
+    return () => unsubscribe()
   }, [])
 
   useEffect(() => {

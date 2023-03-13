@@ -1,7 +1,19 @@
 import 'dotenv/config'
 
 export default {
+  name: 'Nature Log',
+  slug: 'nature-log',
   scheme: 'nature-log',
+  version: '1.0.0',
+  orientation: 'portrait',
+  icon: './assets/icon.png',
+  splash: {
+    image: './assets/splash.png',
+    resizeMode: 'contain',
+    backgroundColor: '#ffffff',
+  },
+  assetBundlePatterns: ['**/*'],
+  jsEngine: 'hermes',
   ios: {
     bundleIdentifier: 'tech.sukima.nature-log',
     config: {
@@ -15,6 +27,13 @@ export default {
   android: {
     package: 'tech.sukima.nature_log',
     googleServicesFile: './google-services.json',
+    adaptiveIcon: {
+      foregroundImage: './assets/adaptive-icon.png',
+      backgroundColor: '#FFFFFF',
+    },
+  },
+  web: {
+    favicon: './assets/favicon.png',
   },
   extra: {
     apiKey: process.env.API_KEY,
@@ -36,4 +55,6 @@ export default {
   runtimeVersion: {
     policy: 'sdkVersion',
   },
+  description: '',
+  githubUrl: 'https://github.com/schwarz9791/nature-log',
 }

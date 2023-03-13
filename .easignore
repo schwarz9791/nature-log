@@ -1,0 +1,14 @@
+
+node_modules/**/*
+.expo/*
+npm-debug.*
+*.orig.*
+web-build/
+web-report/
+
+# macOS
+.DS_Store
+
+# Project
+.tmp/*
+.env
