@@ -1,8 +1,9 @@
 import 'dotenv/config'
 
 export default {
+  owner: 'masakichi2',
   name: 'Nature Log',
-  slug: 'nature-log',
+  slug: process.env.EXPO_PROJECT_SLUG,
   scheme: 'nature-log',
   version: '1.0.0',
   orientation: 'portrait',
@@ -46,11 +47,11 @@ export default {
     iosClientId: process.env.IOS_CLIENT_ID,
     androidClientId: process.env.ANDROID_CLIENT_ID,
     eas: {
-      projectId: 'f72d1397-7f8d-48f6-a68c-aee29f695716',
+      projectId: process.env.EXPO_PROJECT_ID,
     },
   },
   updates: {
-    url: 'https://u.expo.dev/f72d1397-7f8d-48f6-a68c-aee29f695716',
+    url: `https://u.expo.dev/${process.env.EXPO_PROJECT_ID}`,
   },
   runtimeVersion: {
     policy: 'sdkVersion',
