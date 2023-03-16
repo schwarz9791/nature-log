@@ -24,7 +24,12 @@ export type NatureLog = {
   }
 }
 
-export type AirConId = { id: string; room_name: string; nickname: string }
+export type AirConId = {
+  id: string
+  deviceId: string
+  room_name: string
+  nickname: string
+}
 
 type Mode = 'warm' | 'cool' | 'dry' | 'auto'
 /* eslint-enable camelcase */
@@ -69,9 +74,12 @@ export const getAirConIds = async () => {
   }
 }
 
-export const putAirConId = async (id: string) => {
+export const putAirConId = async (id: string, deviceId: string) => {
   try {
-    await functions.httpsCallable('putTargetAirConId')({ id })
+    await functions.httpsCallable('putTargetAirConId')({
+      id,
+      device: { id: deviceId },
+    })
   } catch (e) {
     console.error(`message: ${e.message}`)
     alert('エアコンIDの保存に失敗しました')
