@@ -1,6 +1,6 @@
 import * as GoogleAuthentication from 'expo-google-app-auth'
 import Constants from 'expo-constants'
-import firebase from './fire'
+import firebase from './firebase'
 import { TopScreenNavigationProps } from '../App'
 
 export const signInWithGoogle = async ({

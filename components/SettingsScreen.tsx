@@ -12,12 +12,12 @@ import {
   StackNavigationProp,
 } from '@react-navigation/stack'
 import { Button } from '@rneui/themed'
-import { getAirConIds } from '../lib/fire'
+import { getAirConIds } from '../lib/firebase'
 // import { DrawerProps } from './DrawerMenu'
 
 // import mainContext from '../context/mainContext'
 
-import { putAirConId, turnOnAirCon, turnOffAirCon, AirConId } from '../lib/fire'
+import { putAirConId, turnOnAirCon, turnOffAirCon, AirConId } from '../lib/firebase'
 
 // type SettingsScreens = 'Settings' | 'TargetAirCon'
 
@@ -89,24 +89,29 @@ const SettingsTargetAirCon = ({
     handleGetAirConIds()
   }, [])
 
-  const renderItem = ({ item }: { item: { title: string; key: string } }) => (
+  const renderItem = ({
+    item,
+  }: {
+    item: { title: string; id: string; deviceId: string }
+  }) => (
     <View style={styles.flatListItem}>
       <TouchableOpacity
         onPress={async () => {
-          // handleSetTargetAirConId(item.key)
-          await putAirConId(item.key)
+          // handleSetTargetAirConId(item.id)
+          await putAirConId(item.id, item.deviceId)
           navigation.goBack()
         }}
       >
         <Text style={{ fontSize: 16, marginBottom: 8 }}>{item.title}</Text>
-        <Text style={{ fontSize: 12 }}>{item.key}</Text>
+        <Text style={{ fontSize: 12 }}>{item.id}</Text>
       </TouchableOpacity>
     </View>
   )
 
   const listData = airConIds.map((airCon) => ({
     title: `${airCon.room_name} ${airCon.nickname}`,
-    key: airCon.id,
+    id: airCon.id,
+    deviceId: airCon.deviceId,
   }))
 
   return <FlatList data={listData} renderItem={renderItem} />
