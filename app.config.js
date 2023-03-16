@@ -3,7 +3,7 @@ import 'dotenv/config'
 export default {
   owner: 'masakichi2',
   name: 'Nature Log',
-  slug: process.env.EXPO_PROJECT_SLUG,
+  slug: 'nature-log-2',
   scheme: 'nature-log',
   version: '1.0.0',
   orientation: 'portrait',
