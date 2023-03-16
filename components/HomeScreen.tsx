@@ -27,7 +27,7 @@ import Svg, {
 } from 'react-native-svg'
 import { LinearGradient } from 'expo-linear-gradient'
 import dayjs from 'dayjs'
-import { getNatureLogs, NatureLog } from '../lib/fire'
+import { getNatureLogs, NatureLog } from '../lib/firebase'
 
 type Chart = {
   x: string

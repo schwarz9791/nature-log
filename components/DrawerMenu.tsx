@@ -8,7 +8,7 @@ import {
   DrawerContentComponentProps,
 } from '@react-navigation/drawer'
 
-import firebase from '../lib/fire'
+import firebase from '../lib/firebase'
 
 import HomeScreen from './HomeScreen'
 import SettingsScreen from './SettingsScreen'

@@ -12,12 +12,12 @@ import {
   StackNavigationProp,
 } from '@react-navigation/stack'
 import { Button } from '@rneui/themed'
-import { getAirConIds } from '../lib/fire'
+import { getAirConIds } from '../lib/firebase'
 // import { DrawerProps } from './DrawerMenu'
 
 // import mainContext from '../context/mainContext'
 
-import { putAirConId, turnOnAirCon, turnOffAirCon, AirConId } from '../lib/fire'
+import { putAirConId, turnOnAirCon, turnOffAirCon, AirConId } from '../lib/firebase'
 
 // type SettingsScreens = 'Settings' | 'TargetAirCon'
 

@@ -11,7 +11,7 @@ import {
 import * as Google from 'expo-auth-session/providers/google'
 import Constants from 'expo-constants'
 
-import firebase from './lib/fire'
+import firebase from './lib/firebase'
 // import { signInWithGoogle } from './lib/auth'
 
 import mainContext from './context/mainContext'
