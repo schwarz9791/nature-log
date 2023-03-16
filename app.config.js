@@ -47,11 +47,11 @@ export default {
     iosClientId: process.env.IOS_CLIENT_ID,
     androidClientId: process.env.ANDROID_CLIENT_ID,
     eas: {
-      projectId: process.env.EXPO_PROJECT_ID,
+      projectId: 'f0655e6b-954c-4f41-b292-b54f9e558088',
     },
   },
   updates: {
-    url: `https://u.expo.dev/${process.env.EXPO_PROJECT_ID}`,
+    url: 'https://u.expo.dev/f0655e6b-954c-4f41-b292-b54f9e558088',
   },
   runtimeVersion: {
     policy: 'sdkVersion',
