@@ -1,6 +1,7 @@
 import 'dotenv/config'
 
 export default {
+  owner: 'masakichi',
   name: 'Nature Log',
   slug: 'nature-log',
   scheme: 'nature-log',
