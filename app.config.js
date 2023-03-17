@@ -16,12 +16,6 @@ export default {
   jsEngine: 'hermes',
   ios: {
     bundleIdentifier: 'tech.sukima.nature-log',
-    config: {
-      googleSignIn: {
-        reservedClientId:
-          'com.googleusercontent.apps.255480789690-6ln7342qonu51sa7349fo36tv6oqba3j',
-      },
-    },
     googleServicesFile: './GoogleService-Info.plist',
   },
   android: {
