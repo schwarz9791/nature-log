@@ -47,6 +47,21 @@ firebase.initializeApp(firebaseConfig)
 const db = firebase.firestore()
 const functions = firebase.app().functions('asia-northeast1')
 
+export const handleLogin = (email: string, password: string) => {
+  firebase
+    .auth()
+    .signInWithEmailAndPassword(email, password)
+    .then((credential) => {
+      return credential.user
+    })
+    .catch((e) => {
+      if (e instanceof Error) {
+        console.error(`message: ${e.message}`)
+        alert('ログインに失敗しました')
+      }
+    })
+}
+
 export const getNatureLogs = async (limit: number) => {
   try {
     const snapshot = await db

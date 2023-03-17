@@ -1,4 +1,4 @@
-import React, { /* useState, useContext, */ useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   View,
   StyleSheet,
@@ -6,26 +6,57 @@ import {
   Keyboard,
 } from 'react-native'
 
-import { /* TextInput, */ SocialIcon } from '@rneui/themed'
+import { Input, Button } from '@rneui/themed'
+
+import { handleLogin } from '../lib/firebase'
+
 // import loc from '../utils/localization';
-// import mainContext from '../context/mainContext'
+import { useMainContext, useSetMainContext } from '../context/mainContext'
 import { TopScreenNavigationProps } from '../App'
 
 const LoginScreen = ({
   navigation,
   userLogged,
-  promptAsync,
+  disabled,
 }: {
   navigation: TopScreenNavigationProps
   userLogged: boolean
-  promptAsync: Function
+  disabled: boolean
 }) => {
-  // const { handleSignInWithGoogle } = useContext(mainContext)
-  // const [name, setName] = useState('')
-  // const [email, setEmail] = useState('')
-  // const [password, setPassword] = useState('')
+  const { email, password } = useMainContext()
+  const setMainState = useSetMainContext()
+  const [emailError, setEmailError] = useState('')
+  const [passwordError, setPasswordError] = useState('')
 
   //console.log(mainContext);
+
+  const verifyEmail = (str: string) => {
+    // TODO: あとでちゃんとする
+    if (!str) return "Oops! that's not correct."
+    return ''
+  }
+
+  const handleChangeEmail = (email: string) => {
+    setEmailError(verifyEmail(email))
+
+    if (!emailError) {
+      setMainState((s) => ({ ...s, email }))
+    }
+  }
+
+  const verifyPassword = (str: string) => {
+    // TODO: あとでちゃんとする
+    if (!str) return "Oops! that's not correct."
+    return ''
+  }
+
+  const handleChangePassword = (password: string) => {
+    setPasswordError(verifyPassword(password))
+
+    if (!passwordError) {
+      setMainState((s) => ({ ...s, password }))
+    }
+  }
 
   useEffect(() => {
     if (userLogged) {
@@ -37,69 +68,45 @@ const LoginScreen = ({
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.container}>
-        {/* <View style={styles.inputContainer}>
-          <TextInput
-            placeholder="Email address"
-            onChangeText={(name) => setName(name)}
-            value={name}
-            label={loc.t('nome')}
-            mode="outlined"
-          />
-        </View>
         <View style={styles.inputContainer}>
-          <TextInput
+          <Input
             placeholder="Email address"
-            onChangeText={(email) => setEmail(email)}
+            onChangeText={(email) => handleChangeEmail(email)}
             value={email}
             label="Email"
             keyboardType={'email-address'}
-            mode="outlined"
+            autoCapitalize="none"
+            errorMessage={emailError}
           />
         </View>
         <View style={styles.inputContainer}>
-          <TextInput
+          <Input
             placeholder="Password"
-            onChangeText={(password) => setPassword(password)}
+            onChangeText={(password) => handleChangePassword(password)}
             value={password}
             secureTextEntry={true}
             label="Password"
-            mode="outlined"
+            errorMessage={passwordError}
           />
         </View>
 
         <Button
-          mode="contained"
-          icon="login"
-          onPress={() => handleSignup(email, password)}
+          // icon="login"
+          disabled={disabled || !!emailError || !!passwordError}
+          onPress={() => handleLogin(email, password)}
         >
-          {loc.t('signupButton')}
-        </Button> */}
-        <SocialIcon
-          title="Login with Google"
-          button
-          type="google"
-          iconType="font-awesome"
-          iconColor="white"
-          raised={false}
-          iconSize={16}
-          // onPress={() => handleSignInWithGoogle({ navigation })}
-          onPress={() => promptAsync()}
-          style={{
-            paddingHorizontal: 16,
-            width: 200,
-            height: 48,
-          }}
-        />
+          Login
+        </Button>
       </View>
     </TouchableWithoutFeedback>
   )
 }
 
 const styles = StyleSheet.create({
-  // inputContainer: {
-  //   width: '80%',
-  //   marginBottom: 20,
-  // },
+  inputContainer: {
+    width: '80%',
+    marginBottom: 20,
+  },
   container: {
     flex: 1,
     alignItems: 'center',

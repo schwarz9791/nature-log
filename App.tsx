@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState } from 'react'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { View, ActivityIndicator } from 'react-native'
@@ -12,9 +12,8 @@ import * as Google from 'expo-auth-session/providers/google'
 import Constants from 'expo-constants'
 
 import firebase from './lib/firebase'
-// import { signInWithGoogle } from './lib/auth'
 
-import mainContext from './context/mainContext'
+import { ContextProvider } from './context/mainContext'
 
 import LoginScreen from './components/LoginScreen'
 import AppDrawer from './components/DrawerMenu'
@@ -31,19 +30,10 @@ export type TopScreenNavigationProps = StackNavigationProp<
 
 const App = () => {
   const [userLogged, setUserLogged] = useState(false)
-  const [userProfile, setUserProfile] = useState<firebase.User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  // const [targetAirConId, setTargetAirConId] = useState('')
 
-  const mainC = useMemo(
-    () => ({
-      userProfile: { userProfile },
-      targetAirConId: '',
-    }),
-    []
-  )
   const AppStack = createStackNavigator()
-  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+  const [request, response] = Google.useIdTokenAuthRequest({
     expoClientId: Constants.expoConfig?.extra?.webClientId,
     iosClientId: Constants.expoConfig?.extra?.iosClientId,
     androidClientId: Constants.expoConfig?.extra?.androidClientId,
@@ -51,10 +41,10 @@ const App = () => {
 
   useEffect(() => {
     const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
-      // console.log(user)
+      console.log(user)
       setUserLogged(user ? true : false)
       setIsLoading(false)
-      setUserProfile(user)
+      // setUserProfile(user)
     })
     return () => unsubscribe()
   }, [])
@@ -81,7 +71,7 @@ const App = () => {
   }
 
   return (
-    <mainContext.Provider value={mainC}>
+    <ContextProvider>
       <SafeAreaProvider>
         <NavigationContainer>
           <AppStack.Navigator initialRouteName="Login">
@@ -89,7 +79,7 @@ const App = () => {
               {(props) => (
                 <LoginScreen
                   userLogged={userLogged}
-                  promptAsync={promptAsync}
+                  disabled={!request}
                   {...props}
                 />
               )}
@@ -103,7 +93,7 @@ const App = () => {
         </NavigationContainer>
         <StatusBar />
       </SafeAreaProvider>
-    </mainContext.Provider>
+    </ContextProvider>
   )
 }
 

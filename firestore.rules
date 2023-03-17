@@ -6,10 +6,7 @@ service cloud.firestore {
     }
 
     function checkAuthentication() {
-      return request.auth != null &&
-        request.auth.token.email.matches('^(.+)@sukima[.]tech$') &&
-        request.auth.token.email_verified &&
-        request.auth.token.firebase.sign_in_provider == 'google.com';
+      return request.auth != null;
     }
   }
 }
