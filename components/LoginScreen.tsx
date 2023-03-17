@@ -1,4 +1,4 @@
-import React, { /* useState, useContext, */ useEffect } from 'react'
+import React, { useState, /* useContext, */ useEffect } from 'react'
 import {
   View,
   StyleSheet,
@@ -6,7 +6,7 @@ import {
   Keyboard,
 } from 'react-native'
 
-import { /* TextInput, */ SocialIcon } from '@rneui/themed'
+import { Input, Button, SocialIcon } from '@rneui/themed'
 // import loc from '../utils/localization';
 // import mainContext from '../context/mainContext'
 import { TopScreenNavigationProps } from '../App'
@@ -22,8 +22,8 @@ const LoginScreen = ({
 }) => {
   // const { handleSignInWithGoogle } = useContext(mainContext)
   // const [name, setName] = useState('')
-  // const [email, setEmail] = useState('')
-  // const [password, setPassword] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
 
   //console.log(mainContext);
 
@@ -37,43 +37,31 @@ const LoginScreen = ({
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.container}>
-        {/* <View style={styles.inputContainer}>
-          <TextInput
-            placeholder="Email address"
-            onChangeText={(name) => setName(name)}
-            value={name}
-            label={loc.t('nome')}
-            mode="outlined"
-          />
-        </View>
         <View style={styles.inputContainer}>
-          <TextInput
+          <Input
             placeholder="Email address"
             onChangeText={(email) => setEmail(email)}
             value={email}
             label="Email"
             keyboardType={'email-address'}
-            mode="outlined"
           />
         </View>
         <View style={styles.inputContainer}>
-          <TextInput
+          <Input
             placeholder="Password"
             onChangeText={(password) => setPassword(password)}
             value={password}
             secureTextEntry={true}
             label="Password"
-            mode="outlined"
           />
         </View>
 
         <Button
-          mode="contained"
-          icon="login"
-          onPress={() => handleSignup(email, password)}
+          // icon="login"
+          onPress={() => {}}
         >
-          {loc.t('signupButton')}
-        </Button> */}
+          Login
+        </Button>
         <SocialIcon
           title="Login with Google"
           button
@@ -96,10 +84,10 @@ const LoginScreen = ({
 }
 
 const styles = StyleSheet.create({
-  // inputContainer: {
-  //   width: '80%',
-  //   marginBottom: 20,
-  // },
+  inputContainer: {
+    width: '80%',
+    marginBottom: 20,
+  },
   container: {
     flex: 1,
     alignItems: 'center',
