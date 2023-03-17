@@ -1,14 +1,15 @@
-import React, { useState, /* useContext, */ useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   View,
   StyleSheet,
   TouchableWithoutFeedback,
   Keyboard,
+  Text,
 } from 'react-native'
 
-import { Input, Button, SocialIcon } from '@rneui/themed'
+import { Input, Button, Dialog, SocialIcon } from '@rneui/themed'
 // import loc from '../utils/localization';
-// import mainContext from '../context/mainContext'
+import { useMainContext, useSetMainContext } from '../context/mainContext'
 import { TopScreenNavigationProps } from '../App'
 
 const LoginScreen = ({
@@ -21,11 +22,43 @@ const LoginScreen = ({
   promptAsync: Function
 }) => {
   // const { handleSignInWithGoogle } = useContext(mainContext)
-  // const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const { email, password } = useMainContext()
+  const setMainState = useSetMainContext()
+  const [emailError, setEmailError] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+  const [displayDialog, setDisplayDialog] = useState(false)
 
   //console.log(mainContext);
+
+  const toggleDialog = () => {
+    setDisplayDialog(!displayDialog)
+  }
+
+  const verifyEmail = (str: string) => {
+    if (!str) return "Oops! that's not correct."
+    return ''
+  }
+
+  const handleChangeEmail = (email: string) => {
+    setEmailError(verifyEmail(email))
+
+    if (!emailError) {
+      setMainState((s) => ({ ...s, email }))
+    }
+  }
+
+  const verifyPassword = (str: string) => {
+    if (!str) return "Oops! that's not correct."
+    return ''
+  }
+
+  const handleChangePassword = (password: string) => {
+    setPasswordError(verifyPassword(password))
+
+    if (!passwordError) {
+      setMainState((s) => ({ ...s, password }))
+    }
+  }
 
   useEffect(() => {
     if (userLogged) {
@@ -40,16 +73,17 @@ const LoginScreen = ({
         <View style={styles.inputContainer}>
           <Input
             placeholder="Email address"
-            onChangeText={(email) => setEmail(email)}
+            onChangeText={(email) => handleChangeEmail(email)}
             value={email}
             label="Email"
             keyboardType={'email-address'}
+            autoCapitalize="none"
           />
         </View>
         <View style={styles.inputContainer}>
           <Input
             placeholder="Password"
-            onChangeText={(password) => setPassword(password)}
+            onChangeText={(password) => handleChangePassword(password)}
             value={password}
             secureTextEntry={true}
             label="Password"
@@ -58,7 +92,9 @@ const LoginScreen = ({
 
         <Button
           // icon="login"
-          onPress={() => {}}
+          onPress={() => {
+            setDisplayDialog(true)
+          }}
         >
           Login
         </Button>
@@ -78,6 +114,12 @@ const LoginScreen = ({
             height: 48,
           }}
         />
+        <Dialog isVisible={displayDialog} onBackdropPress={toggleDialog}>
+          <Dialog.Title title="Input Value" />
+          <Text>Dialog body text. Add relevant information here.</Text>
+          <Text>Email: {email}</Text>
+          <Text>Password: {password}</Text>
+        </Dialog>
       </View>
     </TouchableWithoutFeedback>
   )
