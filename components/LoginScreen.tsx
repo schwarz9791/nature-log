@@ -4,10 +4,12 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
   Keyboard,
-  Text,
 } from 'react-native'
 
-import { Input, Button, Dialog, SocialIcon } from '@rneui/themed'
+import { Input, Button, SocialIcon } from '@rneui/themed'
+
+import { handleLogin } from '../lib/firebase'
+
 // import loc from '../utils/localization';
 import { useMainContext, useSetMainContext } from '../context/mainContext'
 import { TopScreenNavigationProps } from '../App'
@@ -26,13 +28,8 @@ const LoginScreen = ({
   const setMainState = useSetMainContext()
   const [emailError, setEmailError] = useState('')
   const [passwordError, setPasswordError] = useState('')
-  const [displayDialog, setDisplayDialog] = useState(false)
 
   //console.log(mainContext);
-
-  const toggleDialog = () => {
-    setDisplayDialog(!displayDialog)
-  }
 
   const verifyEmail = (str: string) => {
     if (!str) return "Oops! that's not correct."
@@ -92,9 +89,7 @@ const LoginScreen = ({
 
         <Button
           // icon="login"
-          onPress={() => {
-            setDisplayDialog(true)
-          }}
+          onPress={() => handleLogin(email, password)}
         >
           Login
         </Button>
@@ -114,12 +109,6 @@ const LoginScreen = ({
             height: 48,
           }}
         />
-        <Dialog isVisible={displayDialog} onBackdropPress={toggleDialog}>
-          <Dialog.Title title="Input Value" />
-          <Text>Dialog body text. Add relevant information here.</Text>
-          <Text>Email: {email}</Text>
-          <Text>Password: {password}</Text>
-        </Dialog>
       </View>
     </TouchableWithoutFeedback>
   )
