@@ -12,7 +12,6 @@ import * as Google from 'expo-auth-session/providers/google'
 import Constants from 'expo-constants'
 
 import firebase from './lib/firebase'
-// import { signInWithGoogle } from './lib/auth'
 
 import { ContextProvider } from './context/mainContext'
 
@@ -34,7 +33,7 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true)
 
   const AppStack = createStackNavigator()
-  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+  const [request, response] = Google.useIdTokenAuthRequest({
     expoClientId: Constants.expoConfig?.extra?.webClientId,
     iosClientId: Constants.expoConfig?.extra?.iosClientId,
     androidClientId: Constants.expoConfig?.extra?.androidClientId,
@@ -42,7 +41,7 @@ const App = () => {
 
   useEffect(() => {
     const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
-      // console.log(user)
+      console.log(user)
       setUserLogged(user ? true : false)
       setIsLoading(false)
       // setUserProfile(user)
@@ -80,7 +79,7 @@ const App = () => {
               {(props) => (
                 <LoginScreen
                   userLogged={userLogged}
-                  promptAsync={promptAsync}
+                  disabled={!request}
                   {...props}
                 />
               )}

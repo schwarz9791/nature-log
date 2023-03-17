@@ -6,7 +6,7 @@ import {
   Keyboard,
 } from 'react-native'
 
-import { Input, Button, SocialIcon } from '@rneui/themed'
+import { Input, Button } from '@rneui/themed'
 
 import { handleLogin } from '../lib/firebase'
 
@@ -17,13 +17,12 @@ import { TopScreenNavigationProps } from '../App'
 const LoginScreen = ({
   navigation,
   userLogged,
-  promptAsync,
+  disabled,
 }: {
   navigation: TopScreenNavigationProps
   userLogged: boolean
-  promptAsync: Function
+  disabled: boolean
 }) => {
-  // const { handleSignInWithGoogle } = useContext(mainContext)
   const { email, password } = useMainContext()
   const setMainState = useSetMainContext()
   const [emailError, setEmailError] = useState('')
@@ -32,6 +31,7 @@ const LoginScreen = ({
   //console.log(mainContext);
 
   const verifyEmail = (str: string) => {
+    // TODO: あとでちゃんとする
     if (!str) return "Oops! that's not correct."
     return ''
   }
@@ -45,6 +45,7 @@ const LoginScreen = ({
   }
 
   const verifyPassword = (str: string) => {
+    // TODO: あとでちゃんとする
     if (!str) return "Oops! that's not correct."
     return ''
   }
@@ -75,6 +76,7 @@ const LoginScreen = ({
             label="Email"
             keyboardType={'email-address'}
             autoCapitalize="none"
+            errorMessage={emailError}
           />
         </View>
         <View style={styles.inputContainer}>
@@ -84,31 +86,17 @@ const LoginScreen = ({
             value={password}
             secureTextEntry={true}
             label="Password"
+            errorMessage={passwordError}
           />
         </View>
 
         <Button
           // icon="login"
+          disabled={disabled || !!emailError || !!passwordError}
           onPress={() => handleLogin(email, password)}
         >
           Login
         </Button>
-        <SocialIcon
-          title="Login with Google"
-          button
-          type="google"
-          iconType="font-awesome"
-          iconColor="white"
-          raised={false}
-          iconSize={16}
-          // onPress={() => handleSignInWithGoogle({ navigation })}
-          onPress={() => promptAsync()}
-          style={{
-            paddingHorizontal: 16,
-            width: 200,
-            height: 48,
-          }}
-        />
       </View>
     </TouchableWithoutFeedback>
   )
