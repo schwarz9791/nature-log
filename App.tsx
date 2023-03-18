@@ -8,12 +8,12 @@ import {
   StackNavigationProp,
 } from '@react-navigation/stack'
 
-import * as Google from 'expo-auth-session/providers/google'
-import Constants from 'expo-constants'
+// import * as Google from 'expo-auth-session/providers/google'
+// import Constants from 'expo-constants'
 
 import firebase from './lib/firebase'
 
-import { ContextProvider } from './context/mainContext'
+import { ContextProvider, useSetMainContext } from './context/mainContext'
 
 import LoginScreen from './components/LoginScreen'
 import AppDrawer from './components/DrawerMenu'
@@ -29,37 +29,41 @@ export type TopScreenNavigationProps = StackNavigationProp<
 >
 
 const App = () => {
-  const [userLogged, setUserLogged] = useState(false)
+  const setMainState = useSetMainContext()
+  const [userLoggedIn, setUserLoggedIn] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [loginDisabled, setLoginDisabled] = useState(false)
 
   const AppStack = createStackNavigator()
-  const [request, response] = Google.useIdTokenAuthRequest({
-    expoClientId: Constants.expoConfig?.extra?.webClientId,
-    iosClientId: Constants.expoConfig?.extra?.iosClientId,
-    androidClientId: Constants.expoConfig?.extra?.androidClientId,
-  })
+  // const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+  //   expoClientId: Constants.expoConfig?.extra?.webClientId,
+  //   iosClientId: Constants.expoConfig?.extra?.iosClientId,
+  //   androidClientId: Constants.expoConfig?.extra?.androidClientId,
+  // })
 
   useEffect(() => {
     const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
       console.log(user)
-      setUserLogged(user ? true : false)
+      setUserLoggedIn(user ? true : false)
       setIsLoading(false)
+      setLoginDisabled(false)
       // setUserProfile(user)
+      setMainState((s) => ({ ...s, userProfile: user }))
     })
     return () => unsubscribe()
   }, [])
 
-  useEffect(() => {
-    if (response?.type === 'success') {
-      // console.log(response)
-      const { id_token, access_token } = response.params
-      const credential = firebase.auth.GoogleAuthProvider.credential(
-        id_token || '',
-        access_token || ''
-      )
-      firebase.auth().signInWithCredential(credential)
-    }
-  }, [response])
+  // useEffect(() => {
+  //   if (response?.type === 'success') {
+  //     // console.log(response)
+  //     const { id_token, access_token } = response.params
+  //     const credential = firebase.auth.GoogleAuthProvider.credential(
+  //       id_token || '',
+  //       access_token || ''
+  //     )
+  //     firebase.auth().signInWithCredential(credential)
+  //   }
+  // }, [response])
 
   if (isLoading) {
     // Checking if already logged in
@@ -78,8 +82,9 @@ const App = () => {
             <AppStack.Screen name="Login">
               {(props) => (
                 <LoginScreen
-                  userLogged={userLogged}
-                  disabled={!request}
+                  setLoginDisabled={setLoginDisabled}
+                  loginDisabled={loginDisabled}
+                  userLoggedIn={userLoggedIn}
                   {...props}
                 />
               )}

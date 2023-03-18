@@ -16,12 +16,14 @@ import { TopScreenNavigationProps } from '../App'
 
 const LoginScreen = ({
   navigation,
-  userLogged,
-  disabled,
+  userLoggedIn,
+  loginDisabled,
+  setLoginDisabled,
 }: {
   navigation: TopScreenNavigationProps
-  userLogged: boolean
-  disabled: boolean
+  userLoggedIn: boolean
+  loginDisabled: boolean
+  setLoginDisabled: Function
 }) => {
   const { email, password } = useMainContext()
   const setMainState = useSetMainContext()
@@ -59,11 +61,11 @@ const LoginScreen = ({
   }
 
   useEffect(() => {
-    if (userLogged) {
-      // console.log(userLogged)
+    if (userLoggedIn) {
+      // console.log(userLoggedIn)
       navigation.push('Main')
     }
-  }, [userLogged])
+  }, [userLoggedIn])
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -92,8 +94,11 @@ const LoginScreen = ({
 
         <Button
           // icon="login"
-          disabled={disabled || !!emailError || !!passwordError}
-          onPress={() => handleLogin(email, password)}
+          disabled={loginDisabled || !!emailError || !!passwordError}
+          onPress={() => {
+            setLoginDisabled(true)
+            handleLogin(email, password)
+          }}
         >
           Login
         </Button>
