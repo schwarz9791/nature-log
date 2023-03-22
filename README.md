@@ -1,5 +1,7 @@
 # Nature Log
 
+![NatureLog](https://user-images.githubusercontent.com/4794430/226876483-4bf17357-7873-48d2-a4ee-f655478bb6f0.gif)
+
 ## Description
 
 [Nature Remo](https://nature.global/nature-remo/) を利用して、室温と湿度のログを記録、閲覧するアプリケーションです。
