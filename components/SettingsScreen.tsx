@@ -17,7 +17,12 @@ import { getAirConIds } from '../lib/firebase'
 
 // import mainContext from '../context/mainContext'
 
-import { putAirConId, turnOnAirCon, turnOffAirCon, AirConId } from '../lib/firebase'
+import {
+  putAirConId,
+  turnOnAirCon,
+  turnOffAirCon,
+  AirConId,
+} from '../lib/firebase'
 
 // type SettingsScreens = 'Settings' | 'TargetAirCon'
 
@@ -44,7 +49,7 @@ const SettingsTop = ({
     <View style={styles.flatListItem}>
       <TouchableOpacity
         onPress={() => {
-          navigation.navigate(item.key)
+          navigation.navigate('TargetAirCon')
         }}
       >
         <Text style={{ fontSize: 16 }}>{item.title}</Text>

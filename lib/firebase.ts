@@ -72,8 +72,10 @@ export const getNatureLogs = async (limit: number) => {
     const res = snapshot.docs.map((doc) => doc.data())
     return res as NatureLog[]
   } catch (e) {
-    console.error(`message: ${e.message}`)
-    alert('ログの取得に失敗しました')
+    if (e instanceof Error) {
+      console.error(`message: ${e.message}`)
+      alert('ログの取得に失敗しました')
+    }
     return []
   }
 }
@@ -83,8 +85,10 @@ export const getAirConIds = async () => {
     const res = await functions.httpsCallable('getAirConIds')()
     return res.data as AirConId[]
   } catch (e) {
-    console.error(`message: ${e.message}`)
-    alert('エアコンIDの取得に失敗しました')
+    if (e instanceof Error) {
+      console.error(`message: ${e.message}`)
+      alert('エアコンIDの取得に失敗しました')
+    }
     return []
   }
 }
@@ -96,8 +100,10 @@ export const putAirConId = async (id: string, deviceId: string) => {
       device: { id: deviceId },
     })
   } catch (e) {
-    console.error(`message: ${e.message}`)
-    alert('エアコンIDの保存に失敗しました')
+    if (e instanceof Error) {
+      console.error(`message: ${e.message}`)
+      alert('エアコンIDの保存に失敗しました')
+    }
   }
 }
 
@@ -105,8 +111,10 @@ export const turnOnAirCon = async (mode?: Mode) => {
   try {
     await functions.httpsCallable('turnOnAirCon')({ mode })
   } catch (e) {
-    console.error(`message: ${e.message}`)
-    alert('エアコンの起動に失敗しました')
+    if (e instanceof Error) {
+      console.error(`message: ${e.message}`)
+      alert('エアコンの起動に失敗しました')
+    }
   }
 }
 
@@ -114,8 +122,10 @@ export const turnOffAirCon = async () => {
   try {
     await functions.httpsCallable('turnOffAirCon')()
   } catch (e) {
-    console.error(`message: ${e.message}`)
-    alert('エアコンの停止に失敗しました')
+    if (e instanceof Error) {
+      console.error(`message: ${e.message}`)
+      alert('エアコンの停止に失敗しました')
+    }
   }
 }
 
