@@ -49,7 +49,7 @@ const SettingsTop = ({
     <View style={styles.flatListItem}>
       <TouchableOpacity
         onPress={() => {
-          navigation.navigate(item.key)
+          navigation.navigate('TargetAirCon')
         }}
       >
         <Text style={{ fontSize: 16 }}>{item.title}</Text>
