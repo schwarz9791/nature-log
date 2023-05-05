@@ -17,7 +17,12 @@ import { getAirConIds } from '../lib/firebase'
 
 // import mainContext from '../context/mainContext'
 
-import { putAirConId, turnOnAirCon, turnOffAirCon, AirConId } from '../lib/firebase'
+import {
+  putAirConId,
+  turnOnAirCon,
+  turnOffAirCon,
+  AirConId,
+} from '../lib/firebase'
 
 // type SettingsScreens = 'Settings' | 'TargetAirCon'
 
