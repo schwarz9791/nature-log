@@ -8,7 +8,7 @@ admin.initializeApp()
 // https://firebase.google.com/docs/functions/typescript
 
 /* eslint-disable camelcase */
-type NatureRemoNewestEvents = {
+export type NatureRemoEvent = {
   hu: {
     created_at: string
     val: number
@@ -245,7 +245,7 @@ export const turnOnAirCon = functions
     return { result: 'succeeded', message }
   })
 
-const storeNatureRemoData = async (data: NatureRemoNewestEvents) => {
+const storeNatureRemoData = async (data: NatureRemoEvent) => {
   const result = await admin
     .firestore()
     .collection('nature_log')
@@ -281,7 +281,7 @@ const fetchNatureRemoData = async () => {
 
   // TODO: とりあえずSettingsで選択しているデバイスの最新ログを取得、全デバイスのログを保存するようにしたい
   return data.filter((d: Device) => d.id === deviceId)[0]
-    .newest_events as NatureRemoNewestEvents
+    .newest_events as NatureRemoEvent
 }
 
 export const getNatureRemoData = functions
@@ -311,9 +311,11 @@ export const cronGetNatureRemoData = functions
       await storeNatureRemoData(latestLog)
       return null
     } catch (e) {
-      functions.logger.error(
-        `Get NatureRemo data failed.\n[MESSAGE]: ${e.message}`
-      )
+      if (e instanceof Error) {
+        functions.logger.error(
+          `Get NatureRemo data failed.\n[MESSAGE]: ${e.message}`
+        )
+      }
       return null
     }
   })
