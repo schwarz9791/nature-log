@@ -11,7 +11,7 @@ import { SWRConfig } from 'swr'
 
 import firebase from './lib/firebase'
 
-import { ContextProvider, useSetMainContext } from './context/mainContext'
+import { ContextProvider } from './context/mainContext'
 
 import LoginScreen from './screens/LoginScreen'
 import MainTabs from './components/MainTabs'
@@ -27,21 +27,19 @@ export type TopScreenNavigationProps = StackNavigationProp<
 >
 
 const App = () => {
-  const setMainState = useSetMainContext()
   const [userLoggedIn, setUserLoggedIn] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [loginDisabled, setLoginDisabled] = useState(false)
+  const [userProfile, setUserProfile] = useState<firebase.UserInfo | null>(null)
 
   const AppStack = createStackNavigator()
 
   useEffect(() => {
     const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
-      console.log(user)
       setUserLoggedIn(user ? true : false)
       setIsLoading(false)
       setLoginDisabled(false)
-      // setUserProfile(user)
-      setMainState((s) => ({ ...s, userProfile: user }))
+      setUserProfile(user)
     })
     return () => unsubscribe()
   }, [])
@@ -88,30 +86,31 @@ const App = () => {
         },
       }}
     >
-    <ContextProvider>
-      <SafeAreaProvider>
-        <NavigationContainer>
-          <AppStack.Navigator initialRouteName="Login">
-            <AppStack.Screen name="Login">
-              {(props) => (
-                <LoginScreen
-                  setLoginDisabled={setLoginDisabled}
-                  loginDisabled={loginDisabled}
-                  userLoggedIn={userLoggedIn}
-                  {...props}
-                />
-              )}
-            </AppStack.Screen>
-            <AppStack.Screen
-              name="Main"
-              component={MainTabs}
-              options={{ headerShown: false }}
-            />
-          </AppStack.Navigator>
-        </NavigationContainer>
-        <StatusBar />
-      </SafeAreaProvider>
-    </ContextProvider>
+      <ContextProvider>
+        <SafeAreaProvider>
+          <NavigationContainer>
+            <AppStack.Navigator initialRouteName="Login">
+              <AppStack.Screen name="Login">
+                {(props) => (
+                  <LoginScreen
+                    setLoginDisabled={setLoginDisabled}
+                    loginDisabled={loginDisabled}
+                    userLoggedIn={userLoggedIn}
+                    userProfile={userProfile}
+                    {...props}
+                  />
+                )}
+              </AppStack.Screen>
+              <AppStack.Screen
+                name="Main"
+                component={MainTabs}
+                options={{ headerShown: false }}
+              />
+            </AppStack.Navigator>
+          </NavigationContainer>
+          <StatusBar />
+        </SafeAreaProvider>
+      </ContextProvider>
     </SWRConfig>
   )
 }

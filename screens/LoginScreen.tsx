@@ -8,7 +8,7 @@ import {
 
 import { Input, Button } from '@rneui/themed'
 
-import { handleLogin } from '../lib/firebase'
+import firebase, { handleLogin } from '../lib/firebase'
 
 // import loc from '../utils/localization';
 import { useMainContext, useSetMainContext } from '../context/mainContext'
@@ -19,11 +19,13 @@ export default function LoginScreen({
   userLoggedIn,
   loginDisabled,
   setLoginDisabled,
+  userProfile,
 }: {
   navigation: TopScreenNavigationProps
   userLoggedIn: boolean
   loginDisabled: boolean
   setLoginDisabled: Function
+  userProfile: firebase.UserInfo | null
 }) {
   const { email, password } = useMainContext()
   const setMainState = useSetMainContext()
@@ -62,7 +64,11 @@ export default function LoginScreen({
 
   useEffect(() => {
     if (userLoggedIn) {
-      // console.log(userLoggedIn)
+      setMainState((s) => ({
+        ...s,
+        userProfile,
+      }))
+      console.log(userProfile)
       navigation.push('Main')
     }
   }, [userLoggedIn])
@@ -97,7 +103,7 @@ export default function LoginScreen({
           disabled={loginDisabled || !!emailError || !!passwordError}
           onPress={() => {
             setLoginDisabled(true)
-            handleLogin(email, password)
+            handleLogin(email, password, setLoginDisabled)
           }}
         >
           Login

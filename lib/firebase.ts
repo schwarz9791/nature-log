@@ -47,7 +47,11 @@ firebase.initializeApp(firebaseConfig)
 const db = firebase.firestore()
 const functions = firebase.app().functions('asia-northeast1')
 
-export const handleLogin = (email: string, password: string) => {
+export const handleLogin = (
+  email: string,
+  password: string,
+  callback: Function
+) => {
   firebase
     .auth()
     .signInWithEmailAndPassword(email, password)
@@ -58,6 +62,7 @@ export const handleLogin = (email: string, password: string) => {
       if (e instanceof Error) {
         console.error(`message: ${e.message}`)
         alert('ログインに失敗しました')
+        callback(false)
       }
     })
 }
