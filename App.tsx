@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
-import { View, ActivityIndicator } from 'react-native'
+import { AppState, View, ActivityIndicator } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import {
   createStackNavigator,
   StackNavigationProp,
 } from '@react-navigation/stack'
+import { SWRConfig } from 'swr'
 
 import firebase from './lib/firebase'
 
@@ -55,6 +56,38 @@ const App = () => {
   }
 
   return (
+    <SWRConfig
+      value={{
+        provider: () => new Map(),
+        isVisible: () => {
+          return true
+        },
+        initFocus(callback) {
+          let appState = AppState.currentState
+
+          const onAppStateChange = (nextAppState) => {
+            /* バックグラウンドモードまたは非アクティブモードからアクティブモードに再開する場合 */
+            if (
+              appState.match(/inactive|background/) &&
+              nextAppState === 'active'
+            ) {
+              callback()
+            }
+            appState = nextAppState
+          }
+
+          // アプリの状態変更を監視する
+          const subscription = AppState.addEventListener(
+            'change',
+            onAppStateChange
+          )
+
+          return () => {
+            subscription.remove()
+          }
+        },
+      }}
+    >
     <ContextProvider>
       <SafeAreaProvider>
         <NavigationContainer>
@@ -79,6 +112,7 @@ const App = () => {
         <StatusBar />
       </SafeAreaProvider>
     </ContextProvider>
+    </SWRConfig>
   )
 }
 
