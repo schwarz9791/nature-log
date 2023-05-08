@@ -294,7 +294,9 @@ export const getNatureRemoData = functions
       // 直接実行する用のAPIなので、レスポンスに取得できたデータを返す
       res.status(200).json({ data: latestLog })
     } catch (e) {
-      res.status(500).json({ status: 500, message: e.message })
+      if (e instanceof Error) {
+        res.status(500).json({ status: 500, message: e.message })
+      }
     }
   })
 
