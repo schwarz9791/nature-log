@@ -16,16 +16,14 @@ import { TopScreenNavigationProps } from '../App'
 
 export default function LoginScreen({
   navigation,
-  userLoggedIn,
   loginDisabled,
   setLoginDisabled,
-  userProfile,
+  userAccount,
 }: {
   navigation: TopScreenNavigationProps
-  userLoggedIn: boolean
   loginDisabled: boolean
   setLoginDisabled: Function
-  userProfile: firebase.UserInfo | null
+  userAccount: firebase.User | null
 }) {
   const { email, password } = useMainContext()
   const setMainState = useSetMainContext()
@@ -63,15 +61,15 @@ export default function LoginScreen({
   }
 
   useEffect(() => {
-    if (userLoggedIn) {
+    if (userAccount) {
       setMainState((s) => ({
         ...s,
-        userProfile,
+        userAccount,
       }))
-      console.log(userProfile)
+      console.log(userAccount)
       navigation.push('Main')
     }
-  }, [userLoggedIn])
+  }, [userAccount])
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>

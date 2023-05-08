@@ -27,19 +27,17 @@ export type TopScreenNavigationProps = StackNavigationProp<
 >
 
 const App = () => {
-  const [userLoggedIn, setUserLoggedIn] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [loginDisabled, setLoginDisabled] = useState(false)
-  const [userProfile, setUserProfile] = useState<firebase.UserInfo | null>(null)
+  const [userAccount, setUserAccount] = useState<firebase.User | null>(null)
 
   const AppStack = createStackNavigator()
 
   useEffect(() => {
     const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
-      setUserLoggedIn(user ? true : false)
       setIsLoading(false)
       setLoginDisabled(false)
-      setUserProfile(user)
+      setUserAccount(user)
     })
     return () => unsubscribe()
   }, [])
@@ -95,8 +93,7 @@ const App = () => {
                   <LoginScreen
                     setLoginDisabled={setLoginDisabled}
                     loginDisabled={loginDisabled}
-                    userLoggedIn={userLoggedIn}
-                    userProfile={userProfile}
+                    userAccount={userAccount}
                     {...props}
                   />
                 )}
