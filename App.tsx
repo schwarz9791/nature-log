@@ -59,9 +59,9 @@ const App = () => {
           return true
         },
         initFocus(callback) {
-          let appState = AppState.currentState
+          let appState: string = AppState.currentState
 
-          const onAppStateChange = (nextAppState) => {
+          const onAppStateChange = (nextAppState: string) => {
             /* バックグラウンドモードまたは非アクティブモードからアクティブモードに再開する場合 */
             if (
               appState.match(/inactive|background/) &&
@@ -73,13 +73,10 @@ const App = () => {
           }
 
           // アプリの状態変更を監視する
-          const subscription = AppState.addEventListener(
-            'change',
-            onAppStateChange
-          )
+          AppState.addEventListener('change', onAppStateChange)
 
           return () => {
-            subscription.remove()
+            AppState.removeEventListener('change', onAppStateChange)
           }
         },
       }}
