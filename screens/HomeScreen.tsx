@@ -6,6 +6,7 @@ import { getNatureLogs } from '../lib/firebase'
 
 export default function HomeScreen() {
   const [key, setKey] = useState(0)
+  // eslint-disable-next-line no-unused-vars
   const { data, error, isLoading } = useSWR(['nature_log', 10], ([_, limit]) =>
     getNatureLogs(limit)
   )
