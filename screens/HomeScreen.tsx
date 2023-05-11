@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { Text, View, ScrollView } from 'react-native'
+import { StyleSheet, Text, View, ScrollView, Dimensions } from 'react-native'
 import { Icon } from '@rneui/themed'
 import useSWR from 'swr'
 import dayjs from 'dayjs'
@@ -103,57 +103,149 @@ export default function HomeScreen() {
   }
 
   return (
-    <ScrollView>
-      <View>
-        <Text>{getDisplayCurrentTime()}</Text>
-        <Icon name="chevron-down" type="feather" color={Colors.Gray} />
-      </View>
-      {/* 選択時点のの天気 */}
-      <View>
-        <Weather
-          weather={currentWeather.weather}
-          temperature={currentWeather.temp}
-          humidity={currentWeather.humidity}
-        />
-      </View>
-      {/* 選択時点の室内気温・湿度 */}
-      <View>
-        <Ring
-          color={Colors.Comfort}
-          max={40}
-          temperature={currentLog?.te?.val}
-          humidity={currentLog?.hu?.val}
-        />
-        <Icon name="code" type="feather" color={Colors.Gray} />
-      </View>
-      {/* 気温ログ */}
-      <View>
-        <LogChart
-          title="Temperature"
-          background={Colors.Comfort}
-          unit="℃"
-          domain={{ y: [10, 25] }}
-          guideLine={{ lower: 14.5, upper: 20.5 }}
-          logData={getFeelingTemperatures()}
-        />
-      </View>
-      {/* 湿度ログ */}
-      <View>
-        <LogChart
-          title="Humidity"
-          background={Colors.Cool}
-          unit="%"
-          domain={{ y: [10, 90] }}
-          guideLine={{ lower: 30, upper: 75 }}
-          logData={getHumidities()}
-        />
-      </View>
-      {/* グラフのZoom */}
-      <View>
-        <Icon name="minus-circle" type="feather" color={Colors.Gray} />
-        <Text>24h</Text>
-        <Icon name="plus-circle" type="feather" color={Colors.Gray} />
+    <ScrollView style={styles.container}>
+      <View style={styles.contentContainer}>
+        <View style={styles.dateTimeContainer}>
+          <Text style={styles.dateTime}>{getDisplayCurrentTime()}</Text>
+          <Icon
+            style={styles.selectDate}
+            name="chevron-down"
+            type="feather"
+            color={Colors.Gray}
+            size={16}
+          />
+        </View>
+        <View style={styles.currentDataContainer}>
+          {/* 選択時点のの天気 */}
+          <View style={styles.weatherDataContainer}>
+            <Weather
+              weather={currentWeather.weather}
+              temperature={currentWeather.temp}
+              humidity={currentWeather.humidity}
+            />
+          </View>
+          {/* 垂直線 */}
+          <View style={styles.hr} />
+          {/* 選択時点の室内気温・湿度 */}
+          <View style={styles.roomDataContainer}>
+            <Ring
+              color={Colors.Comfort}
+              max={40}
+              temperature={currentLog?.te?.val}
+              humidity={currentLog?.hu?.val}
+            />
+            <View style={styles.swapPhysicalAndEffective}>
+              <Icon name="code" type="feather" color={Colors.Gray} size={16} />
+            </View>
+          </View>
+        </View>
+        {/* 気温ログ */}
+        <View>
+          <LogChart
+            title="Temperature"
+            background={Colors.Comfort}
+            unit="℃"
+            domain={{ y: [10, 25] }}
+            guideLine={{ lower: 14.5, upper: 20.5 }}
+            logData={getFeelingTemperatures()}
+          />
+        </View>
+        {/* 湿度ログ */}
+        <View>
+          <LogChart
+            title="Humidity"
+            background={Colors.Cool}
+            unit="%"
+            domain={{ y: [10, 90] }}
+            guideLine={{ lower: 30, upper: 75 }}
+            logData={getHumidities()}
+          />
+        </View>
+        {/* グラフのZoom */}
+        <View style={styles.zoomControlContainer}>
+          <Icon
+            style={styles.zoomIcon}
+            name="minus-circle"
+            type="feather"
+            color={Colors.Gray}
+            size={16}
+          />
+          <Text style={styles.zoomLevel}>24h</Text>
+          <Icon
+            style={styles.zoomIcon}
+            name="plus-circle"
+            type="feather"
+            color={Colors.Gray}
+            size={16}
+          />
+        </View>
       </View>
     </ScrollView>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: Colors.White,
+  },
+  contentContainer: {
+    flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: 16,
+  },
+  dateTimeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 32,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  dateTime: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    lineHeight: 32,
+  },
+  selectDate: {
+    marginLeft: 4,
+    paddingTop: 2,
+  },
+  currentDataContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  weatherDataContainer: {
+    flex: 4,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    paddingRight: 32,
+  },
+  roomDataContainer: {
+    flex: 3,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'flex-start',
+    paddingLeft: 32,
+  },
+  swapPhysicalAndEffective: {
+    padding: 8,
+  },
+  hr: {
+    marginVertical: 8,
+    borderRightWidth: StyleSheet.hairlineWidth,
+    borderRightColor: Colors.LightGray,
+  },
+  zoomControlContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+    marginTop: 8,
+  },
+  zoomIcon: {
+    padding: 8,
+  },
+  zoomLevel: {
+    color: Colors.Gray,
+    fontSize: 13,
+  },
+})
