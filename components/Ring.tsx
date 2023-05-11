@@ -25,45 +25,47 @@ export function Ring({
 
   const labels = temperature ? (
     <>
+      {/* TODO: unit部分を分けたい */}
+      {/* TODO: フォントが通常のテキストと違う */}
         <VictoryLabel
           textAnchor="middle"
           verticalAnchor="middle"
-          x={100}
-          y={75}
+          x={40}
+          y={30}
           text={`${displayTemperature}℃`}
-          style={{ fontSize: 32 }}
+          style={{ fontSize: 17, fontWeight: '600' }}
         />
         <VictoryLabel
           textAnchor="middle"
           verticalAnchor="middle"
-          x={100}
-          y={125}
+          x={40}
+          y={50}
           text={`${displayHumidity}%`}
-          style={{ fontSize: 32 }}
+          style={{ fontSize: 17, fontWeight: '600' }}
         />
     </>
   ) : (
     <VictoryLabel
       textAnchor="middle"
       verticalAnchor="middle"
-      x={100}
-      y={100}
+      x={40}
+      y={40}
       text="Unknown"
-      style={{ fontSize: 32 }}
+      style={{ fontSize: 17 }}
     />
     )
   
   return (
     <View style={styles.ringWrapper}>
-      <Svg viewBox="0 0 200 200" width="100%" height="100%">
+      <Svg viewBox="0 0 80 80" width="100%" height="100%">
         <VictoryPie
           standalone={false}
           data={[{ x: 1, y: 1 }]}
-          width={200}
-          height={200}
-          innerRadius={80}
+          width={80}
+          height={80}
+          innerRadius={32}
           cornerRadius={20}
-          padding={0}
+          padding={2}
           labels={() => null}
           style={{
             data: {
@@ -74,9 +76,9 @@ export function Ring({
         <VictoryPie
           standalone={false}
           data={ratios}
-          width={200}
-          height={200}
-          innerRadius={80}
+          width={80}
+          height={80}
+          innerRadius={30}
           cornerRadius={20}
           padding={0}
           labels={() => null}
@@ -97,6 +99,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 8,
-    height: 112,
+    width: 96,
+    height: 96,
   },
 })
