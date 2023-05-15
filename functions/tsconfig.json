@@ -8,9 +8,10 @@
     "strict": true,
     "target": "es2017",
     "skipLibCheck": true,
-    "typeRoots": [
-      "./functions/node_modules/@types"
-    ]
+    "baseUrl": ".",
+    "paths": {
+      "*": ["src/types/*", "node_modules/@types/*"]
+    }
   },
   "compileOnSave": true,
   "include": [
