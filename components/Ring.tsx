@@ -14,8 +14,12 @@ export function Ring({
   max: number
   temperature?: number
   humidity?: number
-  }) {
-  const percent = temperature ? temperature / max < 1 ? temperature / max : 1 : 0
+}) {
+  const percent = temperature
+    ? temperature / max < 1
+      ? temperature / max
+      : 1
+    : 0
   const ratios = [
     { x: 1, y: percent },
     { x: 2, y: 1 - percent },
@@ -27,22 +31,22 @@ export function Ring({
     <>
       {/* TODO: unit部分を分けたい */}
       {/* TODO: フォントが通常のテキストと違う */}
-        <VictoryLabel
-          textAnchor="middle"
-          verticalAnchor="middle"
-          x={40}
-          y={30}
-          text={`${displayTemperature}℃`}
-          style={{ fontSize: 17, fontWeight: '600' }}
-        />
-        <VictoryLabel
-          textAnchor="middle"
-          verticalAnchor="middle"
-          x={40}
-          y={50}
-          text={`${displayHumidity}%`}
-          style={{ fontSize: 17, fontWeight: '600' }}
-        />
+      <VictoryLabel
+        textAnchor="middle"
+        verticalAnchor="middle"
+        x={40}
+        y={30}
+        text={`${displayTemperature}℃`}
+        style={{ fontSize: 17, fontWeight: '600' }}
+      />
+      <VictoryLabel
+        textAnchor="middle"
+        verticalAnchor="middle"
+        x={40}
+        y={50}
+        text={`${displayHumidity}%`}
+        style={{ fontSize: 17, fontWeight: '600' }}
+      />
     </>
   ) : (
     <VictoryLabel
@@ -53,8 +57,8 @@ export function Ring({
       text="Unknown"
       style={{ fontSize: 17 }}
     />
-    )
-  
+  )
+
   return (
     <View style={styles.ringWrapper}>
       <Svg viewBox="0 0 80 80" width="100%" height="100%">
