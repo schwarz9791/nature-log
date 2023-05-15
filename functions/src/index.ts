@@ -266,7 +266,8 @@ export const cronGetNatureRemoData = functions
     }
   })
 
-const storeHourlyForecast = async (data: HourlyWeather[]) => {
+const storeHourlyForecast = async (data?: HourlyWeather[]) => {
+  if (!data) return null
   const collection = await admin.firestore().collection('open_weather')
   const results: FirebaseFirestore.DocumentData[] = []
   data.forEach(async (forecast) => {
@@ -299,17 +300,31 @@ const fetchHourlyForecast = async () => {
   // TODO: 仮で東京のlat,lon、Settings画面で位置情報などから設定可能にする
   const lat = 35.6828387
   const lon = 139.7594549
-  const params = `?appid=${openWeatherApiKey}lat=${lat}&lon=${lon}&units=metric&lang=ja&exclude=minutely,daily`
+  const params = `?appid=${openWeatherApiKey}&lat=${lat}&lon=${lon}&units=metric&lang=ja&exclude=minutely,daily`
 
-  const res = await fetch(`${url}${params}`, {
-    method: 'GET',
-    headers: {
-      accept: 'application/json',
-    },
-  })
+  try {
+    const res = await fetch(`${url}${params}`, {
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+      },
+    })
 
-  const data = (await res.json()) as WeatherData
-  return data
+    const data = (await res.json()) as WeatherData
+
+    functions.logger.log(
+      'Fetch Open Weather forecast succeeded.',
+      JSON.stringify(data)
+    )
+    return data
+  } catch (e) {
+    if (e instanceof Error) {
+      functions.logger.error(
+        `Fetch Open Weather forecast data failed.\n[MESSAGE]: ${e.message}`
+      )
+    }
+    return null
+  }
 }
 
 export const cronGetForecast = functions
@@ -324,7 +339,7 @@ export const cronGetForecast = functions
     )
     try {
       const hourlyForecast = await fetchHourlyForecast()
-      await storeHourlyForecast(hourlyForecast.hourly.slice(0, 24))
+      await storeHourlyForecast(hourlyForecast?.hourly?.slice(0, 24))
       return null
     } catch (e) {
       if (e instanceof Error) {
