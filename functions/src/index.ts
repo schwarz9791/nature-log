@@ -2,6 +2,7 @@ import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import fetch from 'node-fetch'
 
+import type { Appliance, Device } from './types/natureApi'
 import type { WeatherData, HourlyWeather } from './types/weather'
 
 admin.initializeApp()
@@ -27,66 +28,6 @@ export type NatureRemoEvent = {
     created_at: string
     val: number
   }
-}
-
-type Device = {
-  name: string
-  id: string
-  created_at: string
-  updated_at: string
-  mac_address: string
-  bt_mac_address: string
-  serial_number: string
-  firmware_version: string
-  temperature_offset: number
-  humidity_offset: number
-}
-
-type AirConParams = {
-  temp: string
-  temp_unit: string
-  mode: string
-  vol: string
-  dir: string
-  dirh: string
-  button: string
-  updated_at: string
-}
-
-type ApplianceModal = {
-  id: string
-  country: string
-  manufacturer: string
-  remote_name: string
-  series: string
-  name: string
-  image: string
-}
-
-type Aircon = {}
-type Tv = {}
-type Light = {}
-type SmartMeter = {}
-
-type Signal = {
-  id: string
-  name: string
-  image: string
-}
-
-type Appliance = {
-  id: string
-  device: Device
-  model: ApplianceModal
-  nickname: string
-  image: string
-  type: string
-  settings: AirConParams
-  aircon?: Aircon
-  tv?: Tv
-  light?: Light
-  smart_meter?: SmartMeter
-  signals: Signal[]
 }
 
 type Settings = {
