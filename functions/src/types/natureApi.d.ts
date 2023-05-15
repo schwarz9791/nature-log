@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-interface Device {
+export interface Device {
   name: string
   id: string
   created_at: string

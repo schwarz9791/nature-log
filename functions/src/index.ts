@@ -2,7 +2,7 @@ import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import fetch from 'node-fetch'
 
-import type { Appliance } from './types/natureApi'
+import type { Appliance, Device } from './types/natureApi'
 import type { WeatherData, HourlyWeather } from './types/weather'
 
 admin.initializeApp()
