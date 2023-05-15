@@ -270,14 +270,14 @@ const storeHourlyForecast = async (data?: HourlyWeather[]) => {
   if (!data) return null
   const collection = await admin.firestore().collection('open_weather')
   const results: FirebaseFirestore.DocumentData[] = []
-  data.forEach(async (forecast) => {
+  data.forEach(async (forecast, i) => {
     results.push(
       await collection
         .doc(
           admin.firestore.Timestamp.fromMillis(forecast.dt * 1000).toString()
         )
         .set({
-          ...data,
+          ...data[i],
           created_at: admin.firestore.Timestamp.now(),
         })
     )
