@@ -299,7 +299,7 @@ const fetchHourlyForecast = async () => {
   // TODO: 仮で東京のlat,lon、Settings画面で位置情報などから設定可能にする
   const lat = 35.6828387
   const lon = 139.7594549
-  const params = `?appid=${openWeatherApiKey}lat=${lat}&lon=${lon}&units=metric&lang=ja&exclude=minutely,daily`
+  const params = `?appid=${openWeatherApiKey}&lat=${lat}&lon=${lon}&units=metric&lang=ja&exclude=minutely,daily`
 
   const res = await fetch(`${url}${params}`, {
     method: 'GET',
