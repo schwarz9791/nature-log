@@ -2,6 +2,8 @@ import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import fetch from 'node-fetch'
 
+import { WeatherData, HourlyWeather } from './@types/weather'
+
 admin.initializeApp()
 
 // Start writing Firebase Functions
@@ -111,6 +113,7 @@ type Settings = {
 
 const token = functions.config().nature_remo.access_token
 const settingsKey = functions.config().user.settings_key
+const openWeatherApiKey = functions.config().open_weather.api_key
 const headers = {
   'Content-Type': 'application/json;charset=UTF-8',
   Authorization: 'Bearer ' + token,
@@ -302,7 +305,7 @@ export const getNatureRemoData = functions
 
 export const cronGetNatureRemoData = functions
   .region('asia-northeast1')
-  .pubsub.schedule('every 15 minutes')
+  .pubsub.schedule('every 15 minutes past the hour')
   .onRun(async (context) => {
     functions.logger.log(
       'Get start Nature Remo data!!!',
@@ -316,6 +319,76 @@ export const cronGetNatureRemoData = functions
       if (e instanceof Error) {
         functions.logger.error(
           `Get NatureRemo data failed.\n[MESSAGE]: ${e.message}`
+        )
+      }
+      return null
+    }
+  })
+
+const storeHourlyForecast = async (data: HourlyWeather[]) => {
+  const collection = await admin.firestore().collection('open_weather')
+  const results: FirebaseFirestore.DocumentData[] = []
+  data.forEach(async (forecast) => {
+    results.push(
+      await collection
+        .doc(
+          admin.firestore.Timestamp.fromMillis(forecast.dt * 1000).toString()
+        )
+        .set({
+          ...data,
+          created_at: admin.firestore.Timestamp.now(),
+        })
+    )
+  })
+
+  // output log
+  const ids = results.map((result) => result.id).join(', ')
+  functions.logger.log({
+    result: `Open Weather forecast data with IDs: ${ids} added.`,
+  })
+
+  return {
+    ids: ids.split(', '),
+    data,
+  }
+}
+
+const fetchHourlyForecast = async () => {
+  const url = 'https://api.openweathermap.org/data/3.0/onecall'
+  // TODO: 仮で東京のlat,lon、Settings画面で位置情報などから設定可能にする
+  const lat = 35.6828387
+  const lon = 139.7594549
+  const params = `?appid=${openWeatherApiKey}lat=${lat}&lon=${lon}&units=metric&lang=ja&exclude=minutely,daily`
+
+  const res = await fetch(`${url}${params}`, {
+    method: 'GET',
+    headers: {
+      accept: 'application/json',
+    },
+  })
+
+  const data = (await res.json()) as WeatherData
+  return data
+}
+
+export const cronGetForecast = functions
+  .region('asia-northeast1')
+  // TODO: とりあえず毎時実行、0:00だけでも良い？
+  .pubsub.schedule('every day, at minute 0, every hour')
+  // .pubsub.schedule('every day at 00:00')
+  .onRun(async (context) => {
+    functions.logger.log(
+      'Get start Open Weather forecast data!!!',
+      JSON.stringify(context)
+    )
+    try {
+      const hourlyForecast = await fetchHourlyForecast()
+      await storeHourlyForecast(hourlyForecast.hourly.slice(0, 24))
+      return null
+    } catch (e) {
+      if (e instanceof Error) {
+        functions.logger.error(
+          `Get Open Weather forecast data failed.\n[MESSAGE]: ${e.message}`
         )
       }
       return null
