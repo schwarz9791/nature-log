@@ -272,14 +272,10 @@ const storeHourlyForecast = async (data?: HourlyWeather[]) => {
   const results: FirebaseFirestore.DocumentData[] = []
   data.forEach(async (forecast, i) => {
     results.push(
-      await collection
-        .doc(
-          admin.firestore.Timestamp.fromMillis(forecast.dt * 1000).toString()
-        )
-        .set({
-          ...data[i],
-          created_at: admin.firestore.Timestamp.now(),
-        })
+      await collection.doc(new Date(forecast.dt * 1000).toISOString()).set({
+        ...data[i],
+        created_at: admin.firestore.Timestamp.now(),
+      })
     )
   })
 
