@@ -246,7 +246,7 @@ export const getNatureRemoData = functions
 
 export const cronGetNatureRemoData = functions
   .region('asia-northeast1')
-  .pubsub.schedule('every 15 minutes past the hour')
+  .pubsub.schedule('every 15 minutes synchronized')
   .onRun(async (context) => {
     functions.logger.log(
       'Get start Nature Remo data!!!',
@@ -315,7 +315,7 @@ const fetchHourlyForecast = async () => {
 export const cronGetForecast = functions
   .region('asia-northeast1')
   // TODO: とりあえず毎時実行、0:00だけでも良い？
-  .pubsub.schedule('every day, at minute 0, every hour')
+  .pubsub.schedule('every 1 hours synchronized')
   // .pubsub.schedule('every day at 00:00')
   .onRun(async (context) => {
     functions.logger.log(
