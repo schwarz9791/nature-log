@@ -305,7 +305,7 @@ export const getNatureRemoData = functions
 
 export const cronGetNatureRemoData = functions
   .region('asia-northeast1')
-  .pubsub.schedule('every 15 minutes')
+  .pubsub.schedule('every 15 minutes past the hour')
   .onRun(async (context) => {
     functions.logger.log(
       'Get start Nature Remo data!!!',
