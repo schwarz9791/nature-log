@@ -2,7 +2,7 @@ import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import fetch from 'node-fetch'
 
-import { WeatherData, HourlyWeather } from './@types/weather'
+import type { WeatherData, HourlyWeather } from './types/weather'
 
 admin.initializeApp()
 
