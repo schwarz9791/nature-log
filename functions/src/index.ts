@@ -269,24 +269,29 @@ export const cronGetNatureRemoData = functions
 const storeHourlyForecast = async (data?: HourlyWeather[]) => {
   if (!data) return null
   const collection = await admin.firestore().collection('open_weather')
-  const results: FirebaseFirestore.DocumentData[] = []
+  const ids = data.map((forecast) => new Date(forecast.dt * 1000).toISOString())
   data.forEach(async (forecast, i) => {
-    results.push(
-      await collection.doc(new Date(forecast.dt * 1000).toISOString()).set({
-        ...data[i],
+    try {
+      await collection.doc(ids[i]).set({
+        ...forecast,
         created_at: admin.firestore.Timestamp.now(),
       })
-    )
+    } catch (e) {
+      if (e instanceof Error) {
+        functions.logger.error(
+          `Store OpenWeather forecast data with ID:${ids[i]} failed.\n[MESSAGE]: ${e.message}`
+        )
+      }
+    }
   })
 
   // output log
-  const ids = results.map((result) => result.id).join(', ')
   functions.logger.log({
-    result: `Open Weather forecast data with IDs: ${ids} added.`,
+    result: `OpenWeather forecast data with IDs: ${ids.join(', ')} added.`,
   })
 
   return {
-    ids: ids.split(', '),
+    ids: ids,
     data,
   }
 }
@@ -309,14 +314,14 @@ const fetchHourlyForecast = async () => {
     const data = (await res.json()) as WeatherData
 
     functions.logger.log(
-      'Fetch Open Weather forecast succeeded.',
+      'Fetch OpenWeather forecast succeeded.',
       JSON.stringify(data)
     )
     return data
   } catch (e) {
     if (e instanceof Error) {
       functions.logger.error(
-        `Fetch Open Weather forecast data failed.\n[MESSAGE]: ${e.message}`
+        `Fetch OpenWeather forecast data failed.\n[MESSAGE]: ${e.message}`
       )
     }
     return null
@@ -330,7 +335,7 @@ export const cronGetForecast = functions
   // .pubsub.schedule('every day at 00:00')
   .onRun(async (context) => {
     functions.logger.log(
-      'Get start Open Weather forecast data!!!',
+      'Get start OpenWeather forecast data!!!',
       JSON.stringify(context)
     )
     try {
@@ -340,7 +345,7 @@ export const cronGetForecast = functions
     } catch (e) {
       if (e instanceof Error) {
         functions.logger.error(
-          `Get Open Weather forecast data failed.\n[MESSAGE]: ${e.message}`
+          `Get OpenWeather forecast data failed.\n[MESSAGE]: ${e.message}`
         )
       }
       return null
