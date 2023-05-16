@@ -271,10 +271,18 @@ const storeHourlyForecast = async (data?: HourlyWeather[]) => {
   const collection = await admin.firestore().collection('open_weather')
   const ids = data.map((forecast) => new Date(forecast.dt * 1000).toISOString())
   data.forEach(async (forecast, i) => {
-    await collection.doc(ids[i]).set({
-      ...forecast,
-      created_at: admin.firestore.Timestamp.now(),
-    })
+    try {
+      await collection.doc(ids[i]).set({
+        ...forecast,
+        created_at: admin.firestore.Timestamp.now(),
+      })
+    } catch (e) {
+      if (e instanceof Error) {
+        functions.logger.error(
+          `Store Open Weather forecast data with ID:${ids[i]} failed.\n[MESSAGE]: ${e.message}`
+        )
+      }
+    }
   })
 
   // output log
