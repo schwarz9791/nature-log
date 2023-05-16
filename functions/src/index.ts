@@ -279,7 +279,7 @@ const storeHourlyForecast = async (data?: HourlyWeather[]) => {
     } catch (e) {
       if (e instanceof Error) {
         functions.logger.error(
-          `Store Open Weather forecast data with ID:${ids[i]} failed.\n[MESSAGE]: ${e.message}`
+          `Store OpenWeather forecast data with ID:${ids[i]} failed.\n[MESSAGE]: ${e.message}`
         )
       }
     }
@@ -287,7 +287,7 @@ const storeHourlyForecast = async (data?: HourlyWeather[]) => {
 
   // output log
   functions.logger.log({
-    result: `Open Weather forecast data with IDs: ${ids.join(', ')} added.`,
+    result: `OpenWeather forecast data with IDs: ${ids.join(', ')} added.`,
   })
 
   return {
@@ -314,14 +314,14 @@ const fetchHourlyForecast = async () => {
     const data = (await res.json()) as WeatherData
 
     functions.logger.log(
-      'Fetch Open Weather forecast succeeded.',
+      'Fetch OpenWeather forecast succeeded.',
       JSON.stringify(data)
     )
     return data
   } catch (e) {
     if (e instanceof Error) {
       functions.logger.error(
-        `Fetch Open Weather forecast data failed.\n[MESSAGE]: ${e.message}`
+        `Fetch OpenWeather forecast data failed.\n[MESSAGE]: ${e.message}`
       )
     }
     return null
@@ -335,7 +335,7 @@ export const cronGetForecast = functions
   // .pubsub.schedule('every day at 00:00')
   .onRun(async (context) => {
     functions.logger.log(
-      'Get start Open Weather forecast data!!!',
+      'Get start OpenWeather forecast data!!!',
       JSON.stringify(context)
     )
     try {
@@ -345,7 +345,7 @@ export const cronGetForecast = functions
     } catch (e) {
       if (e instanceof Error) {
         functions.logger.error(
-          `Get Open Weather forecast data failed.\n[MESSAGE]: ${e.message}`
+          `Get OpenWeather forecast data failed.\n[MESSAGE]: ${e.message}`
         )
       }
       return null
