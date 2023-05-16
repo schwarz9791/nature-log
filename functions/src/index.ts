@@ -269,24 +269,21 @@ export const cronGetNatureRemoData = functions
 const storeHourlyForecast = async (data?: HourlyWeather[]) => {
   if (!data) return null
   const collection = await admin.firestore().collection('open_weather')
-  const results: FirebaseFirestore.DocumentData[] = []
+  const ids = data.map((forecast) => new Date(forecast.dt * 1000).toISOString())
   data.forEach(async (forecast, i) => {
-    results.push(
-      await collection.doc(new Date(forecast.dt * 1000).toISOString()).set({
-        ...data[i],
-        created_at: admin.firestore.Timestamp.now(),
-      })
-    )
+    await collection.doc(ids[i]).set({
+      ...forecast,
+      created_at: admin.firestore.Timestamp.now(),
+    })
   })
 
   // output log
-  const ids = results.map((result) => result.id).join(', ')
   functions.logger.log({
-    result: `Open Weather forecast data with IDs: ${ids} added.`,
+    result: `Open Weather forecast data with IDs: ${ids.join(', ')} added.`,
   })
 
   return {
-    ids: ids.split(', '),
+    ids: ids,
     data,
   }
 }
