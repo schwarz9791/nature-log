@@ -4,6 +4,9 @@ service cloud.firestore {
     match /nature_log/{logID} {
       allow read: if checkAuthentication();
     }
+    match /open_weather/{forecastDateTime} {
+      allow read: if checkAuthentication();
+    }
 
     function checkAuthentication() {
       return request.auth != null;
