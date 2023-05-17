@@ -4,7 +4,7 @@ import { Icon } from '@rneui/themed'
 import useSWR from 'swr'
 import dayjs from 'dayjs'
 
-import { getNatureLogs } from '../lib/firebase'
+import { getNatureLogs, getHourlyForecasts } from '../lib/firebase'
 
 import { Colors, WeatherType, Chart } from '../constants'
 import { Weather } from '../components/Weather'
@@ -20,12 +20,22 @@ export default function HomeScreen() {
     humidity: number
   } = { weather: 'Clear', temp: 24, humidity: 35 }
 
-  const { data: logData, error, isLoading } = useSWR(
-    ['nature_logData', 24 * 4],
+  const { data: logData, error: logError, isLoading: isLogLoading } = useSWR(
+    ['nature_log', 24 * 4],
     // eslint-disable-next-line no-unused-vars
     ([_, limit]) => getNatureLogs(limit)
   )
+  const {
+    data: weatherForecastData,
+    error: wetherForecastError,
+    isLoading: isWeatherForecastLoading,
+  } = useSWR(
+    ['open_weather', 24],
+    // eslint-disable-next-line no-unused-vars
+    ([_, limit]) => getHourlyForecasts(limit)
+  )
   const currentLog = logData ? logData[0] : null
+  const currentWether = weatherForecastData ? weatherForecastData[0] : null
 
   const formatDate = useCallback((date: Date) => {
     return dayjs(date).format('YY/MM/DD HH:mm')
@@ -86,7 +96,7 @@ export default function HomeScreen() {
     return dayjs(currentTime).format('YYYY/MM/DD HH:mm')
   }
 
-  if (error) {
+  if (logError || wetherForecastError) {
     return (
       <View>
         <Text>Failed to load</Text>
@@ -94,7 +104,7 @@ export default function HomeScreen() {
     )
   }
 
-  if (isLoading) {
+  if (isLogLoading || isWeatherForecastLoading) {
     return (
       <View>
         <Text>Loading...</Text>
