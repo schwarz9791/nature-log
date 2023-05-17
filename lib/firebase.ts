@@ -3,6 +3,8 @@ import firebase from 'firebase'
 import 'firebase/firestore'
 import 'firebase/functions'
 
+import type { HourlyWeather } from '@/functions/src/types/weather'
+
 /* eslint-disable camelcase */
 export type NatureLog = {
   created_at: firebase.firestore.Timestamp
@@ -79,7 +81,7 @@ export const getNatureLogs = async (limit: number) => {
   } catch (e) {
     if (e instanceof Error) {
       console.error(`message: ${e.message}`)
-      alert('ログの取得に失敗しました')
+      alert('室温・湿度ログの取得に失敗しました')
     }
     return []
   }
@@ -131,6 +133,24 @@ export const turnOffAirCon = async () => {
       console.error(`message: ${e.message}`)
       alert('エアコンの停止に失敗しました')
     }
+  }
+}
+
+export const getHourlyForecasts = async (limit: number) => {
+  try {
+    const snapshot = await db
+      .collection('open_weather')
+      .orderBy('dt', 'desc')
+      .limit(limit)
+      .get()
+    const res = snapshot.docs.map((doc) => doc.data())
+    return res as HourlyWeather[]
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`message: ${e.message}`)
+      alert('天気予報ログの取得に失敗しました')
+    }
+    return []
   }
 }
 
