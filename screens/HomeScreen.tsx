@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { StyleSheet, Text, View, ScrollView, Dimensions } from 'react-native'
+import { StyleSheet, Text, View, ScrollView } from 'react-native'
 import { Icon } from '@rneui/themed'
 import useSWR from 'swr'
 import dayjs from 'dayjs'
