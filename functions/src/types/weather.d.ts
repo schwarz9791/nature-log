@@ -1,7 +1,9 @@
+import type { WeatherType } from '../../../constants'
+
 /* eslint-disable camelcase */
 interface Weather {
   id: number
-  main: string
+  main: WeatherType
   description: string
   icon: string
 }
@@ -10,7 +12,7 @@ interface Rain {
   '1h': number
 }
 
-interface CurrentWeather {
+export interface CurrentWeather {
   dt: number
   sunrise: number
   sunset: number
