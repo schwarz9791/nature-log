@@ -9,16 +9,30 @@ export const Colors = {
   Cold: '#1F47AF',
   Black: '#000000',
   White: '#FFFFFF',
-}
+} as const
 
 // TODO
-export type WeatherType = 'Clear' | 'Clouds'
+// export type WeatherType = 'Clear' | 'Clouds' | 'Unknown'
+export const WeatherType = {
+  Clear: 'Clear',
+  Clouds: 'Clouds',
+  Unknown: 'Unknown',
+} as const
+// export type WeatherType = typeof Weathers[number]
 
 // TODO
 export const WeatherIconMap = {
-  Clear: 'sun',
-  Clouds: 'cloud',
-}
+  [WeatherType.Clear]: 'sun',
+  [WeatherType.Clouds]: 'cloud',
+  [WeatherType.Unknown]: 'help-circle',
+} as const
+
+// TODO
+export const WeatherColorMap = {
+  [WeatherType.Clear]: Colors.Warm,
+  [WeatherType.Clouds]: Colors.Gray,
+  [WeatherType.Unknown]: Colors.LightGray,
+} as const
 
 export type Chart = {
   x: string
