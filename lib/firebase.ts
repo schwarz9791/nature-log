@@ -1,7 +1,11 @@
 import Constants from 'expo-constants'
-import firebase from 'firebase'
+import dayjs from 'dayjs'
+import firebase from 'firebase/app'
+import 'firebase/auth'
 import 'firebase/firestore'
 import 'firebase/functions'
+
+import type { HourlyWeather } from '@/functions/src/types/weather'
 
 /* eslint-disable camelcase */
 export type NatureLog = {
@@ -67,11 +71,18 @@ export const handleLogin = (
     })
 }
 
-export const getNatureLogs = async (limit: number) => {
+export const getNatureLogs = async (
+  startAt: dayjs.Dayjs,
+  numberOfDay: number,
+  limit: number
+) => {
+  const endAt = startAt.add(numberOfDay, 'day')
   try {
     const snapshot = await db
       .collection('nature_log')
-      .orderBy('created_at', 'desc')
+      .orderBy('created_at', 'asc')
+      .startAt(firebase.firestore.Timestamp.fromDate(startAt.toDate()))
+      .endAt(firebase.firestore.Timestamp.fromDate(endAt.toDate()))
       .limit(limit)
       .get()
     const res = snapshot.docs.map((doc) => doc.data())
@@ -79,7 +90,7 @@ export const getNatureLogs = async (limit: number) => {
   } catch (e) {
     if (e instanceof Error) {
       console.error(`message: ${e.message}`)
-      alert('ログの取得に失敗しました')
+      alert('室温・湿度ログの取得に失敗しました')
     }
     return []
   }
@@ -131,6 +142,31 @@ export const turnOffAirCon = async () => {
       console.error(`message: ${e.message}`)
       alert('エアコンの停止に失敗しました')
     }
+  }
+}
+
+export const getHourlyForecasts = async (
+  startAt: dayjs.Dayjs,
+  numberOfDay: number,
+  limit: number
+) => {
+  const endAt = startAt.add(numberOfDay, 'day')
+  try {
+    const snapshot = await db
+      .collection('open_weather')
+      .orderBy('dt', 'asc')
+      .where('dt', '>=', Math.floor(startAt.toDate().getTime() / 1000))
+      .where('dt', '<', Math.floor(endAt.toDate().getTime() / 1000))
+      .limit(limit)
+      .get()
+    const res = snapshot.docs.map((doc) => doc.data())
+    return res as HourlyWeather[]
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`message: ${e.message}`)
+      alert('天気予報ログの取得に失敗しました')
+    }
+    return []
   }
 }
 

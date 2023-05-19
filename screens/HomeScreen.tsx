@@ -4,32 +4,43 @@ import { Icon } from '@rneui/themed'
 import useSWR from 'swr'
 import dayjs from 'dayjs'
 
-import { getNatureLogs } from '../lib/firebase'
+import { getNatureLogs, getHourlyForecasts } from '../lib/firebase'
+import { fetchCurrentWeather } from '../lib/openWeather'
 
 import { Colors, WeatherType, Chart } from '../constants'
 import { Weather } from '../components/Weather'
 import { Ring } from '../components/Ring'
 import { LogChart } from '../components/LogChart'
 
+const date = dayjs(new Date().toLocaleDateString('ja'))
+
 export default function HomeScreen() {
   const [currentTime, setCurrentTime] = useState(new Date())
 
-  const currentWeather: {
-    weather: WeatherType
-    temp: number
-    humidity: number
-  } = { weather: 'Clear', temp: 24, humidity: 35 }
-
-  const { data: logData, error, isLoading } = useSWR(
-    ['nature_logData', 24 * 4],
+  const { data: logData, error: logError, isLoading: isLogLoading } = useSWR(
+    ['nature_log', 24 * 4],
     // eslint-disable-next-line no-unused-vars
-    ([_, limit]) => getNatureLogs(limit)
+    ([_, limit]) => getNatureLogs(date, 1, limit)
   )
+  const {
+    data: weatherForecastData,
+    error: wetherForecastError,
+    isLoading: isWeatherForecastLoading,
+  } = useSWR(
+    ['open_weather', 24],
+    // eslint-disable-next-line no-unused-vars
+    ([_, limit]) => getHourlyForecasts(date, 1, limit)
+  )
+  const {
+    data: currentWeather,
+    error: currentWeatherError,
+    isLoading: currentWeatherIsLoading,
+  } = useSWR('current_weather', fetchCurrentWeather)
   const currentLog = logData ? logData[0] : null
 
-  const formatDate = useCallback((date: Date) => {
-    return dayjs(date).format('YY/MM/DD HH:mm')
-  }, [])
+  // const formatDate = useCallback((date: Date) => {
+  //   return dayjs(date).format('YY/MM/DD HH:mm')
+  // }, [])
 
   const getTemperature = useCallback(
     (i: number): number => {
@@ -41,7 +52,7 @@ export default function HomeScreen() {
   const getTemperatures = useCallback((): Chart[] => {
     return (
       logData?.map((log) => ({
-        x: formatDate(log.created_at.toDate()),
+        x: Math.floor(log.created_at.toDate().getTime() / 1000),
         y: log.te?.val || 0,
       })) || []
     )
@@ -57,7 +68,7 @@ export default function HomeScreen() {
   const getHumidities = useCallback((): Chart[] => {
     return (
       logData?.map((log) => ({
-        x: formatDate(log.created_at.toDate()),
+        x: Math.floor(log.created_at.toDate().getTime() / 1000),
         y: log.hu?.val || 0,
       })) || []
     )
@@ -75,18 +86,40 @@ export default function HomeScreen() {
         const denominator = 0.68 - 0.0014 * hu + 1 / a // 式内分母
         // return 37 - (37 - te) / denominator - 0.29 * te * (1 - hu / 100) // ミスナール改良計算式
         return {
-          x: formatDate(log.created_at.toDate()),
+          x: Math.floor(log.created_at.toDate().getTime() / 1000),
           y: 37 - (37 - te) / denominator - 0.29 * te * (1 - hu / 100), // ミスナール改良計算式
         }
-      }) || [{ x: 'unknown', y: 0 }]
+      }) || [{ x: 0, y: 0 }]
     )
   }, [logData])
+
+  const getTemperatureForecasts = useCallback((): Chart[] => {
+    return (
+      weatherForecastData?.map((forecast) => {
+        return {
+          x: forecast.dt,
+          y: forecast.temp,
+        }
+      }) || [{ x: 0, y: 0 }]
+    )
+  }, [weatherForecastData])
+
+  const getHumidityForecasts = useCallback((): Chart[] => {
+    return (
+      weatherForecastData?.map((forecast) => {
+        return {
+          x: forecast.dt,
+          y: forecast.humidity,
+        }
+      }) || [{ x: 0, y: 0 }]
+    )
+  }, [weatherForecastData])
 
   const getDisplayCurrentTime = () => {
     return dayjs(currentTime).format('YYYY/MM/DD HH:mm')
   }
 
-  if (error) {
+  if (logError || wetherForecastError || currentWeatherError) {
     return (
       <View>
         <Text>Failed to load</Text>
@@ -94,7 +127,7 @@ export default function HomeScreen() {
     )
   }
 
-  if (isLoading) {
+  if (isLogLoading || isWeatherForecastLoading || currentWeatherIsLoading) {
     return (
       <View>
         <Text>Loading...</Text>
@@ -119,9 +152,9 @@ export default function HomeScreen() {
           {/* 選択時点のの天気 */}
           <View style={styles.weatherDataContainer}>
             <Weather
-              weather={currentWeather.weather}
-              temperature={currentWeather.temp}
-              humidity={currentWeather.humidity}
+              weather={currentWeather?.weather[0].main ?? WeatherType.Unknown}
+              temperature={currentWeather?.temp}
+              humidity={currentWeather?.humidity}
             />
           </View>
           {/* 垂直線 */}
@@ -145,9 +178,16 @@ export default function HomeScreen() {
             title="Temperature"
             background={Colors.Comfort}
             unit="℃"
-            domain={{ y: [10, 25] }}
+            domain={{
+              x: [
+                weatherForecastData?.[0]?.dt ?? 0,
+                weatherForecastData?.[weatherForecastData.length - 1]?.dt ?? 0,
+              ],
+              y: [10, 25],
+            }}
             guideLine={{ lower: 14.5, upper: 20.5 }}
             logData={getFeelingTemperatures()}
+            forecastData={getTemperatureForecasts()}
           />
         </View>
         {/* 湿度ログ */}
@@ -156,9 +196,16 @@ export default function HomeScreen() {
             title="Humidity"
             background={Colors.Cool}
             unit="%"
-            domain={{ y: [10, 90] }}
+            domain={{
+              x: [
+                weatherForecastData?.[0]?.dt ?? 0,
+                weatherForecastData?.[weatherForecastData.length - 1]?.dt ?? 0,
+              ],
+              y: [10, 90],
+            }}
             guideLine={{ lower: 30, upper: 75 }}
             logData={getHumidities()}
+            forecastData={getHumidityForecasts()}
           />
         </View>
         {/* グラフのZoom */}
