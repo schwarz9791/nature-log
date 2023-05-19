@@ -145,11 +145,18 @@ export const turnOffAirCon = async () => {
   }
 }
 
-export const getHourlyForecasts = async (limit: number) => {
+export const getHourlyForecasts = async (
+  startAt: dayjs.Dayjs,
+  numberOfDay: number,
+  limit: number
+) => {
+  const endAt = startAt.add(numberOfDay, 'day')
   try {
     const snapshot = await db
       .collection('open_weather')
-      .orderBy('dt', 'desc')
+      .orderBy('dt', 'asc')
+      .where('dt', '>=', Math.floor(startAt.toDate().getTime() / 1000))
+      .where('dt', '<', Math.floor(endAt.toDate().getTime() / 1000))
       .limit(limit)
       .get()
     const res = snapshot.docs.map((doc) => doc.data())

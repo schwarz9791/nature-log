@@ -14,6 +14,7 @@ import {
   Stop,
 } from 'react-native-svg'
 import { LinearGradient } from 'expo-linear-gradient'
+import dayjs from 'dayjs'
 
 import { Chart } from '../constants'
 
@@ -24,6 +25,7 @@ export function LogChart({
   domain,
   guideLine,
   logData,
+  forecastData,
 }: {
   title: string
   background: string
@@ -34,7 +36,9 @@ export function LogChart({
     upper: number
   }
   logData: Chart[]
+  forecastData: Chart[]
 }) {
+  const startAt = forecastData[0].x
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
@@ -51,6 +55,7 @@ export function LogChart({
           width={Dimensions.get('window').width - 16 * 2}
           padding={{ top: 20, bottom: 40, left: 50, right: 45 }}
           containerComponent={<VictoryZoomContainer />}
+          domain={domain}
         >
           {/* VictoryAreaのfill部分のグラデーション定義 */}
           <Defs>
@@ -67,8 +72,14 @@ export function LogChart({
           </Defs>
           {/* styleにgridのstrokeDasharrayやticksのsizeを指定すると型エラーが出る */}
           <VictoryAxis
-            tickCount={5}
-            tickFormat={(x) => x.split(' ')[1]}
+            tickValues={[
+              startAt,
+              startAt + 5 * 60 * 60,
+              startAt + 10 * 60 * 60,
+              startAt + 15 * 60 * 60,
+              startAt + 20 * 60 * 60,
+            ]}
+            tickFormat={(x) => dayjs(x * 1000).format('HH:mm')}
             style={{
               axis: { stroke: 'white', strokeWidth: 1 },
               grid: { strokeDasharray: [2, 4] },
@@ -98,6 +109,17 @@ export function LogChart({
             y={() => guideLine.lower}
             style={{
               data: { stroke: 'rgba(0, 192, 255, 0.9)', strokeWidth: 1 },
+            }}
+          />
+          <VictoryLine
+            data={forecastData}
+            domain={domain}
+            interpolation="natural"
+            style={{
+              data: {
+                stroke: 'rgba(255, 255, 51, 0.75)',
+                strokeWidth: 2,
+              },
             }}
           />
           <VictoryArea

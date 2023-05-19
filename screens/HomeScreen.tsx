@@ -5,6 +5,7 @@ import useSWR from 'swr'
 import dayjs from 'dayjs'
 
 import { getNatureLogs, getHourlyForecasts } from '../lib/firebase'
+import { fetchCurrentWeather } from '../lib/openWeather'
 
 import { Colors, WeatherType, Chart } from '../constants'
 import { Weather } from '../components/Weather'
@@ -34,14 +35,14 @@ export default function HomeScreen() {
   } = useSWR(
     ['open_weather', 24],
     // eslint-disable-next-line no-unused-vars
-    ([_, limit]) => getHourlyForecasts(limit)
+    ([_, limit]) => getHourlyForecasts(date, 1, limit)
   )
   const currentLog = logData ? logData[0] : null
   const currentWether = weatherForecastData ? weatherForecastData[0] : null
 
-  const formatDate = useCallback((date: Date) => {
-    return dayjs(date).format('YY/MM/DD HH:mm')
-  }, [])
+  // const formatDate = useCallback((date: Date) => {
+  //   return dayjs(date).format('YY/MM/DD HH:mm')
+  // }, [])
 
   const getTemperature = useCallback(
     (i: number): number => {
@@ -53,7 +54,7 @@ export default function HomeScreen() {
   const getTemperatures = useCallback((): Chart[] => {
     return (
       logData?.map((log) => ({
-        x: formatDate(log.created_at.toDate()),
+        x: Math.floor(log.created_at.toDate().getTime() / 1000),
         y: log.te?.val || 0,
       })) || []
     )
@@ -69,7 +70,7 @@ export default function HomeScreen() {
   const getHumidities = useCallback((): Chart[] => {
     return (
       logData?.map((log) => ({
-        x: formatDate(log.created_at.toDate()),
+        x: Math.floor(log.created_at.toDate().getTime() / 1000),
         y: log.hu?.val || 0,
       })) || []
     )
@@ -87,12 +88,34 @@ export default function HomeScreen() {
         const denominator = 0.68 - 0.0014 * hu + 1 / a // 式内分母
         // return 37 - (37 - te) / denominator - 0.29 * te * (1 - hu / 100) // ミスナール改良計算式
         return {
-          x: formatDate(log.created_at.toDate()),
+          x: Math.floor(log.created_at.toDate().getTime() / 1000),
           y: 37 - (37 - te) / denominator - 0.29 * te * (1 - hu / 100), // ミスナール改良計算式
         }
-      }) || [{ x: 'unknown', y: 0 }]
+      }) || [{ x: 0, y: 0 }]
     )
   }, [logData])
+
+  const getTemperatureForecasts = useCallback((): Chart[] => {
+    return (
+      weatherForecastData?.map((forecast) => {
+        return {
+          x: forecast.dt,
+          y: forecast.temp,
+        }
+      }) || [{ x: 0, y: 0 }]
+    )
+  }, [weatherForecastData])
+
+  const getHumidityForecasts = useCallback((): Chart[] => {
+    return (
+      weatherForecastData?.map((forecast) => {
+        return {
+          x: forecast.dt,
+          y: forecast.humidity,
+        }
+      }) || [{ x: 0, y: 0 }]
+    )
+  }, [weatherForecastData])
 
   const getDisplayCurrentTime = () => {
     return dayjs(currentTime).format('YYYY/MM/DD HH:mm')
@@ -157,9 +180,16 @@ export default function HomeScreen() {
             title="Temperature"
             background={Colors.Comfort}
             unit="℃"
-            domain={{ y: [10, 25] }}
+            domain={{
+              x: [
+                weatherForecastData?.[0]?.dt ?? 0,
+                weatherForecastData?.[weatherForecastData.length - 1]?.dt ?? 0,
+              ],
+              y: [10, 25],
+            }}
             guideLine={{ lower: 14.5, upper: 20.5 }}
             logData={getFeelingTemperatures()}
+            forecastData={getTemperatureForecasts()}
           />
         </View>
         {/* 湿度ログ */}
@@ -168,9 +198,16 @@ export default function HomeScreen() {
             title="Humidity"
             background={Colors.Cool}
             unit="%"
-            domain={{ y: [10, 90] }}
+            domain={{
+              x: [
+                weatherForecastData?.[0]?.dt ?? 0,
+                weatherForecastData?.[weatherForecastData.length - 1]?.dt ?? 0,
+              ],
+              y: [10, 90],
+            }}
             guideLine={{ lower: 30, upper: 75 }}
             logData={getHumidities()}
+            forecastData={getHumidityForecasts()}
           />
         </View>
         {/* グラフのZoom */}
