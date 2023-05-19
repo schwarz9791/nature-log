@@ -1,4 +1,5 @@
 import Constants from 'expo-constants'
+import dayjs from 'dayjs'
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
@@ -70,11 +71,18 @@ export const handleLogin = (
     })
 }
 
-export const getNatureLogs = async (limit: number) => {
+export const getNatureLogs = async (
+  startAt: dayjs.Dayjs,
+  numberOfDay: number,
+  limit: number
+) => {
+  const endAt = startAt.add(numberOfDay, 'day')
   try {
     const snapshot = await db
       .collection('nature_log')
-      .orderBy('created_at', 'desc')
+      .orderBy('created_at', 'asc')
+      .startAt(firebase.firestore.Timestamp.fromDate(startAt.toDate()))
+      .endAt(firebase.firestore.Timestamp.fromDate(endAt.toDate()))
       .limit(limit)
       .get()
     const res = snapshot.docs.map((doc) => doc.data())
