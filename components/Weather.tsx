@@ -22,11 +22,11 @@ export function Weather({
       />
       <View style={styles.dataContainer}>
         <View style={styles.valueContainer}>
-          <Text style={styles.value}>{temperature || '-'}</Text>
+          <Text style={styles.value}>{temperature?.toFixed(1) || '-'}</Text>
           <Text style={styles.unit}>℃</Text>
         </View>
         <View style={styles.valueContainer}>
-          <Text style={styles.value}>{humidity || '-'}</Text>
+          <Text style={styles.value}>{humidity?.toFixed(1) || '-'}</Text>
           <Text style={styles.unit}>%</Text>
         </View>
       </View>

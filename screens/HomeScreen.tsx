@@ -17,12 +17,6 @@ const date = dayjs(new Date().toLocaleDateString('ja'))
 export default function HomeScreen() {
   const [currentTime, setCurrentTime] = useState(new Date())
 
-  const currentWeather: {
-    weather: keyof typeof WeatherType
-    temp: number
-    humidity: number
-  } = { weather: 'Clear', temp: 24, humidity: 35 }
-
   const { data: logData, error: logError, isLoading: isLogLoading } = useSWR(
     ['nature_log', 24 * 4],
     // eslint-disable-next-line no-unused-vars
@@ -37,8 +31,12 @@ export default function HomeScreen() {
     // eslint-disable-next-line no-unused-vars
     ([_, limit]) => getHourlyForecasts(date, 1, limit)
   )
+  const {
+    data: currentWeather,
+    error: currentWeatherError,
+    isLoading: currentWeatherIsLoading,
+  } = useSWR('current_weather', fetchCurrentWeather)
   const currentLog = logData ? logData[0] : null
-  const currentWether = weatherForecastData ? weatherForecastData[0] : null
 
   // const formatDate = useCallback((date: Date) => {
   //   return dayjs(date).format('YY/MM/DD HH:mm')
@@ -121,7 +119,7 @@ export default function HomeScreen() {
     return dayjs(currentTime).format('YYYY/MM/DD HH:mm')
   }
 
-  if (logError || wetherForecastError) {
+  if (logError || wetherForecastError || currentWeatherError) {
     return (
       <View>
         <Text>Failed to load</Text>
@@ -129,7 +127,7 @@ export default function HomeScreen() {
     )
   }
 
-  if (isLogLoading || isWeatherForecastLoading) {
+  if (isLogLoading || isWeatherForecastLoading || currentWeatherIsLoading) {
     return (
       <View>
         <Text>Loading...</Text>
@@ -154,9 +152,9 @@ export default function HomeScreen() {
           {/* 選択時点のの天気 */}
           <View style={styles.weatherDataContainer}>
             <Weather
-              weather={currentWeather.weather}
-              temperature={currentWeather.temp}
-              humidity={currentWeather.humidity}
+              weather={currentWeather?.weather[0].main ?? WeatherType.Unknown}
+              temperature={currentWeather?.temp}
+              humidity={currentWeather?.humidity}
             />
           </View>
           {/* 垂直線 */}
