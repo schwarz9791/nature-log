@@ -10,14 +10,14 @@ import firebase from '../lib/firebase'
 export type MainState = {
   email: string
   password: string
-  userProfile: firebase.UserInfo | null
+  userAccount: firebase.User | null
   targetAirConId: string
 }
 
 const initialMainState: MainState = {
   email: '',
   password: '',
-  userProfile: null,
+  userAccount: null,
   targetAirConId: '',
 }
 

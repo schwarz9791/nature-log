@@ -2,13 +2,16 @@ import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import fetch from 'node-fetch'
 
+import type { Appliance, Device } from './types/natureApi'
+import type { WeatherData, HourlyWeather } from './types/weather'
+
 admin.initializeApp()
 
 // Start writing Firebase Functions
 // https://firebase.google.com/docs/functions/typescript
 
 /* eslint-disable camelcase */
-type NatureRemoNewestEvents = {
+export type NatureRemoEvent = {
   hu: {
     created_at: string
     val: number
@@ -25,66 +28,6 @@ type NatureRemoNewestEvents = {
     created_at: string
     val: number
   }
-}
-
-type Device = {
-  name: string
-  id: string
-  created_at: string
-  updated_at: string
-  mac_address: string
-  bt_mac_address: string
-  serial_number: string
-  firmware_version: string
-  temperature_offset: number
-  humidity_offset: number
-}
-
-type AirConParams = {
-  temp: string
-  temp_unit: string
-  mode: string
-  vol: string
-  dir: string
-  dirh: string
-  button: string
-  updated_at: string
-}
-
-type ApplianceModal = {
-  id: string
-  country: string
-  manufacturer: string
-  remote_name: string
-  series: string
-  name: string
-  image: string
-}
-
-type Aircon = {}
-type Tv = {}
-type Light = {}
-type SmartMeter = {}
-
-type Signal = {
-  id: string
-  name: string
-  image: string
-}
-
-type Appliance = {
-  id: string
-  device: Device
-  model: ApplianceModal
-  nickname: string
-  image: string
-  type: string
-  settings: AirConParams
-  aircon?: Aircon
-  tv?: Tv
-  light?: Light
-  smart_meter?: SmartMeter
-  signals: Signal[]
 }
 
 type Settings = {
@@ -111,6 +54,7 @@ type Settings = {
 
 const token = functions.config().nature_remo.access_token
 const settingsKey = functions.config().user.settings_key
+const openWeatherApiKey = functions.config().open_weather.api_key
 const headers = {
   'Content-Type': 'application/json;charset=UTF-8',
   Authorization: 'Bearer ' + token,
@@ -245,7 +189,7 @@ export const turnOnAirCon = functions
     return { result: 'succeeded', message }
   })
 
-const storeNatureRemoData = async (data: NatureRemoNewestEvents) => {
+const storeNatureRemoData = async (data: NatureRemoEvent) => {
   const result = await admin
     .firestore()
     .collection('nature_log')
@@ -281,7 +225,7 @@ const fetchNatureRemoData = async () => {
 
   // TODO: とりあえずSettingsで選択しているデバイスの最新ログを取得、全デバイスのログを保存するようにしたい
   return data.filter((d: Device) => d.id === deviceId)[0]
-    .newest_events as NatureRemoNewestEvents
+    .newest_events as NatureRemoEvent
 }
 
 export const getNatureRemoData = functions
@@ -294,13 +238,15 @@ export const getNatureRemoData = functions
       // 直接実行する用のAPIなので、レスポンスに取得できたデータを返す
       res.status(200).json({ data: latestLog })
     } catch (e) {
-      res.status(500).json({ status: 500, message: e.message })
+      if (e instanceof Error) {
+        res.status(500).json({ status: 500, message: e.message })
+      }
     }
   })
 
 export const cronGetNatureRemoData = functions
   .region('asia-northeast1')
-  .pubsub.schedule('every 15 minutes')
+  .pubsub.schedule('every 15 minutes synchronized')
   .onRun(async (context) => {
     functions.logger.log(
       'Get start Nature Remo data!!!',
@@ -311,9 +257,97 @@ export const cronGetNatureRemoData = functions
       await storeNatureRemoData(latestLog)
       return null
     } catch (e) {
+      if (e instanceof Error) {
+        functions.logger.error(
+          `Get NatureRemo data failed.\n[MESSAGE]: ${e.message}`
+        )
+      }
+      return null
+    }
+  })
+
+const storeHourlyForecast = async (data?: HourlyWeather[]) => {
+  if (!data) return null
+  const collection = await admin.firestore().collection('open_weather')
+  const ids = data.map((forecast) => new Date(forecast.dt * 1000).toISOString())
+  data.forEach(async (forecast, i) => {
+    try {
+      await collection.doc(ids[i]).set({
+        ...forecast,
+        created_at: admin.firestore.Timestamp.now(),
+      })
+    } catch (e) {
+      if (e instanceof Error) {
+        functions.logger.error(
+          `Store OpenWeather forecast data with ID:${ids[i]} failed.\n[MESSAGE]: ${e.message}`
+        )
+      }
+    }
+  })
+
+  // output log
+  functions.logger.log({
+    result: `OpenWeather forecast data with IDs: ${ids.join(', ')} added.`,
+  })
+
+  return {
+    ids: ids,
+    data,
+  }
+}
+
+const fetchHourlyForecast = async () => {
+  const url = 'https://api.openweathermap.org/data/3.0/onecall'
+  // TODO: 仮で東京のlat,lon、Settings画面で位置情報などから設定可能にする
+  const lat = 35.6828387
+  const lon = 139.7594549
+  const params = `?appid=${openWeatherApiKey}&lat=${lat}&lon=${lon}&units=metric&lang=ja&exclude=minutely,daily`
+
+  try {
+    const res = await fetch(`${url}${params}`, {
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+      },
+    })
+
+    const data = (await res.json()) as WeatherData
+
+    functions.logger.log(
+      'Fetch OpenWeather forecast succeeded.',
+      JSON.stringify(data)
+    )
+    return data
+  } catch (e) {
+    if (e instanceof Error) {
       functions.logger.error(
-        `Get NatureRemo data failed.\n[MESSAGE]: ${e.message}`
+        `Fetch OpenWeather forecast data failed.\n[MESSAGE]: ${e.message}`
       )
+    }
+    return null
+  }
+}
+
+export const cronGetForecast = functions
+  .region('asia-northeast1')
+  // TODO: とりあえず毎時実行、0:00だけでも良い？
+  .pubsub.schedule('every 1 hours synchronized')
+  // .pubsub.schedule('every day at 00:00')
+  .onRun(async (context) => {
+    functions.logger.log(
+      'Get start OpenWeather forecast data!!!',
+      JSON.stringify(context)
+    )
+    try {
+      const hourlyForecast = await fetchHourlyForecast()
+      await storeHourlyForecast(hourlyForecast?.hourly?.slice(0, 24))
+      return null
+    } catch (e) {
+      if (e instanceof Error) {
+        functions.logger.error(
+          `Get OpenWeather forecast data failed.\n[MESSAGE]: ${e.message}`
+        )
+      }
       return null
     }
   })
