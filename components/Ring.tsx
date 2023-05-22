@@ -24,8 +24,8 @@ export function Ring({
     { x: 1, y: percent },
     { x: 2, y: 1 - percent },
   ]
-  const displayTemperature = temperature ? Math.round(temperature * 10) / 10 : 0
-  const displayHumidity = humidity ? Math.round(humidity * 10) / 10 : 0
+  const displayTemperature = temperature?.toFixed(1) ?? 0
+  const displayHumidity = humidity?.toFixed(1) ?? 0
 
   const labels = temperature ? (
     <>
