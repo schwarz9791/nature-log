@@ -12,10 +12,9 @@ import { Weather } from '../components/Weather'
 import { Ring } from '../components/Ring'
 import { LogChart } from '../components/LogChart'
 
-const date = dayjs(new Date().toLocaleDateString('ja'))
-
 export default function HomeScreen() {
   const [currentTime, setCurrentTime] = useState(new Date())
+  const [date, setDate] = useState(dayjs(currentTime.toLocaleDateString('ja')))
 
   const { data: logData, error: logError, isLoading: isLogLoading } = useSWR(
     ['nature_log', 24 * 4],
