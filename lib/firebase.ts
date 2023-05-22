@@ -48,6 +48,10 @@ const firebaseConfig = {
 }
 
 firebase.initializeApp(firebaseConfig)
+firebase.firestore().settings({
+  experimentalForceLongPolling: true,
+  merge: true,
+})
 const db = firebase.firestore()
 const functions = firebase.app().functions('asia-northeast1')
 

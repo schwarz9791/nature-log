@@ -38,7 +38,7 @@ export function LogChart({
   logData: Chart[]
   forecastData: Chart[]
 }) {
-  const startAt = forecastData[0].x
+  const startAt = forecastData[0]?.x ?? 0
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
