@@ -262,18 +262,19 @@ const styles = StyleSheet.create({
   },
   weatherDataContainer: {
     flex: 4,
-    alignItems: 'flex-end',
+    alignItems: 'center',
     justifyContent: 'center',
-    paddingRight: 32,
   },
   roomDataContainer: {
     flex: 3,
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'flex-start',
-    paddingLeft: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   swapPhysicalAndEffective: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
     padding: 8,
   },
   hr: {
